@@ -13,25 +13,25 @@ This is the operational counterpart to the design docs (`01`–`08`). Plan files
 | Phase | Surface | Status | Files |
 | --- | --- | :---: | --- |
 | 0 | Scaffold + toolchain | `[x]` | `Anchor.toml`, `Cargo.toml`, `target` symlink |
-| 1 | Plan folder | `[~]` | `plan/01..10_*.md` |
+| 1 | Plan folder | `[x]` | `plan/01..10_*.md` |
 | 2 | Foundation | `[x]` | `constants.rs`, `error.rs`, `events.rs`, `types.rs` |
 | 3 | State layer | `[x]` | `state/{household,member,purchase_request,mod}.rs` |
 | 4a | Instructions — household | `[x]` | `instructions/household.rs` |
-| 4b | Instructions — funds | `[ ]` | `instructions/funds.rs` |
-| 4c | Instructions — purchase | `[ ]` | `instructions/purchase.rs` |
-| 4d | Instructions — reimburse | `[ ]` | `instructions/reimburse.rs` |
-| 4e | Instructions — rewards | `[ ]` | `instructions/rewards.rs` |
-| 4f | Instructions index | `[ ]` | `instructions/mod.rs` |
-| 5 | `lib.rs` dispatch wiring | `[ ]` | `lib.rs` |
-| 6 | First clean build | `[ ]` | `target/deploy/stocksie.so`, `target/idl/stocksie.json` |
-| 7 | LiteSVM harness + smoke | `[ ]` | `tests/helpers/mod.rs`, `tests/test_household.rs` |
-| 8 | Lifecycle + permission tests | `[ ]` | `tests/test_{lifecycle,permissions,reimburse,rewards}.rs` |
-| 9 | Security + invariant tests | `[ ]` | `tests/test_{security,invariants,privacy_invariant,space}.rs` |
-| 10 | Lint, clippy, fmt, autofixer | `[ ]` | whole crate |
-| 11 | Docs (user + dev) | `[ ]` | `docs/{ARCHITECTURE,SECURITY,TESTING}.md`, `README.md` |
-| 12 | Handover doc | `[ ]` | `.handovers/001_stocksie_mvp.md` |
+| 4b | Instructions — funds | `[x]` | `instructions/funds.rs` |
+| 4c | Instructions — purchase | `[x]` | `instructions/purchase.rs` |
+| 4d | Instructions — reimburse | `[x]` | `instructions/reimburse.rs` |
+| 4e | Instructions — rewards | `[x]` | `instructions/rewards.rs` |
+| 4f | Instructions index | `[x]` | `instructions/mod.rs` |
+| 5 | `lib.rs` dispatch wiring | `[x]` | `lib.rs` |
+| 6 | First clean build | `[x]` | `target/deploy/stocksie.so`, `target/idl/stocksie.json` |
+| 7 | LiteSVM harness + smoke | `[x]` | `tests/helpers/mod.rs`, `tests/test_household.rs` |
+| 8 | Lifecycle + permission tests | `[x]` | `tests/test_{lifecycle,permissions,reimburse,rewards}.rs` |
+| 9 | Security + invariant tests | `[x]` | `tests/test_{security,invariants,privacy_invariant,space}.rs` |
+| 10 | Lint, clippy, fmt, autofixer | `[x]` | whole crate |
+| 11 | Docs (9-doc spec) | `[x]` | `README.md`, `CHANGELOG.md`, `docs/*.md` (7) |
+| 12 | Handover doc | `[x]` | `.handovers/002_stocksie_mvp.md` |
 
-**Current focus**: finish the plan folder (`Phase 1`), then resume at **Phase 4b** (`instructions/funds.rs`).
+**Current focus**: **MVP complete** — all 12 phases done, 75/75 tests green, 9-doc set shipped (Phase 11). Branch `develop/feature/01_household_program` ready for PR to `develop`.
 
 ---
 
@@ -57,7 +57,7 @@ Both must succeed.
 
 ---
 
-## Phase 1 — Plan folder `[~]`
+## Phase 1 — Plan folder `[x]`
 
 **Goal**: the plan folder is the single source of truth; nothing gets implemented before its plan file exists.
 
@@ -71,8 +71,8 @@ Both must succeed.
 - `[x]` `plan/06_events.md`
 - `[x]` `plan/07_security.md`
 - `[x]` `plan/08_testing.md`
-- `[~]` `plan/09_build_phases.md` (this file)
-- `[ ]` `plan/10_docs.md`
+- `[x]` `plan/09_build_phases.md` (this file)
+- `[x]` `plan/10_docs.md`
 
 **Done when**: all 10 plan files exist and cross-reference each other consistently.
 
@@ -144,12 +144,12 @@ cargo test -p stocksie --lib state
 
 ---
 
-## Phase 4b — Instructions: funds `[ ]` ← RESUME HERE
+## Phase 4b — Instructions: funds `[x]`
 
 **Goal**: the shared treasury in/out flows.
 
 **Files**:
-- `[ ]` `programs/stocksie/src/instructions/funds.rs` — `DepositFunds`, `WithdrawFunds` accounts + handlers.
+- `[x]` `programs/stocksie/src/instructions/funds.rs` — `DepositFunds`, `WithdrawFunds` accounts + handlers.
 
 **Spec**: `plan/04_instructions.md` §2.1 and §2.2.
 
@@ -158,10 +158,10 @@ cargo test -p stocksie --lib state
 - `WithdrawFunds`: Owner-only (`caller_member.role.can_withdraw_funds()`). Defense-in-depth `household.owner == owner.key()`. Calls `Household::debit_vault(household, owner, lamports)`. Emits `FundsWithdrawn`. Reject `lamports == 0` with `ZeroWithdrawal`.
 
 **Done when**:
-- `[ ]` Both handlers compile against the `Household` methods from Phase 3.
-- `[ ]` `deposit_funds` works for any active member (Guest included).
-- `[ ]` `withdraw_funds` rejects non-owners with `UnauthorizedRole`.
-- `[ ]` Events emitted match `06_events.md` §3.2.
+- `[x]` Both handlers compile against the `Household` methods from Phase 3.
+- `[x]` `deposit_funds` works for any active member (Guest included).
+- `[x]` `withdraw_funds` rejects non-owners with `UnauthorizedRole`.
+- `[x]` Events emitted match `06_events.md` §3.2.
 
 **Verification**:
 ```sh
@@ -173,12 +173,12 @@ cargo build -p stocksie        # must compile cleanly
 
 ---
 
-## Phase 4c — Instructions: purchase lifecycle `[ ]`
+## Phase 4c — Instructions: purchase lifecycle `[x]`
 
 **Goal**: the create/approve/reject/confirm/close surface.
 
 **Files**:
-- `[ ]` `programs/stocksie/src/instructions/purchase.rs` — `CreatePurchaseRequest`, `ApprovePurchaseRequest`, `RejectPurchaseRequest`, `ConfirmRestock`, `ClosePurchaseRequest`.
+- `[x]` `programs/stocksie/src/instructions/purchase.rs` — `CreatePurchaseRequest`, `ApprovePurchaseRequest`, `RejectPurchaseRequest`, `ConfirmRestock`, `ClosePurchaseRequest`.
 
 **Spec**: `plan/04_instructions.md` §3.1–§3.5. State machine: `plan/05_state_machine.md`.
 
@@ -190,20 +190,20 @@ cargo build -p stocksie        # must compile cleanly
 - `ClosePurchaseRequest`: terminal-only; caller is buyer or Owner; `close = caller`.
 
 **Done when**:
-- `[ ]` All five handlers compile.
-- `[ ]` State transitions go exclusively through `PurchaseRequest::transition_*` (no direct `status = ...`).
-- `[ ]` Reporter/buyer rewards fire exactly once per stage.
+- `[x]` All five handlers compile.
+- `[x]` State transitions go exclusively through `PurchaseRequest::transition_*` (no direct `status = ...`).
+- `[x]` Reporter/buyer rewards fire exactly once per stage.
 
 **Next up**: **Phase 4d** — `programs/stocksie/src/instructions/reimburse.rs`.
 
 ---
 
-## Phase 4d — Instructions: reimburse `[ ]`
+## Phase 4d — Instructions: reimburse `[x]`
 
 **Goal**: the trust-critical vault → buyer SOL transfer.
 
 **Files**:
-- `[ ]` `programs/stocksie/src/instructions/reimburse.rs` — `ReimburseBuyer` accounts + handler.
+- `[x]` `programs/stocksie/src/instructions/reimburse.rs` — `ReimburseBuyer` accounts + handler.
 
 **Spec**: `plan/04_instructions.md` §4.1. Security: `plan/07_security.md` §3.1–§3.3, §7.
 
@@ -217,21 +217,21 @@ cargo build -p stocksie        # must compile cleanly
 **Critical ordering**: vault solvency is checked inside `debit_vault`. If the vault is short, the call errors **before** the state machine commits, so the request stays in `Restocked` and can be retried after a top-up. (Covered by `test_reimburse.rs::insufficient_vault_does_not_advance_state`.)
 
 **Done when**:
-- `[ ]` Handler compiles.
-- `[ ]` Buyer's balance increases by exactly `lamports`; vault decreases by exactly `lamports`.
-- `[ ]` `lamports > amount_lamports` → `ReimbursementExceedsApproved`.
-- `[ ]` Second call → `AlreadyReimbursed`.
+- `[x]` Handler compiles.
+- `[x]` Buyer's balance increases by exactly `lamports`; vault decreases by exactly `lamports`.
+- `[x]` `lamports > amount_lamports` → `ReimbursementExceedsApproved`.
+- `[x]` Second call → `AlreadyReimbursed`.
 
 **Next up**: **Phase 4e** — `programs/stocksie/src/instructions/rewards.rs`.
 
 ---
 
-## Phase 4e — Instructions: rewards `[ ]`
+## Phase 4e — Instructions: rewards `[x]`
 
 **Goal**: manual reward grant + summary emit.
 
 **Files**:
-- `[ ]` `programs/stocksie/src/instructions/rewards.rs` — `AwardReward`, `RewardSummary` accounts + handlers.
+- `[x]` `programs/stocksie/src/instructions/rewards.rs` — `AwardReward`, `RewardSummary` accounts + handlers.
 
 **Spec**: `plan/04_instructions.md` §5.1–§5.2.
 
@@ -240,50 +240,50 @@ cargo build -p stocksie        # must compile cleanly
 - `RewardSummary`: active member, read-only. Emit `RewardEarned` with `points = 0` (sentinel) and current `total_points`.
 
 **Done when**:
-- `[ ]` Both handlers compile.
-- `[ ]` `points == 0` rejected by `AwardReward` but used as sentinel by `RewardSummary`.
+- `[x]` Both handlers compile.
+- `[x]` `points == 0` rejected by `AwardReward` but used as sentinel by `RewardSummary`.
 
 **Next up**: **Phase 4f** — `programs/stocksie/src/instructions/mod.rs` (index), then **Phase 5** — `lib.rs`.
 
 ---
 
-## Phase 4f — Instructions index `[ ]`
+## Phase 4f — Instructions index `[x]`
 
 **Files**:
-- `[ ]` `programs/stocksie/src/instructions/mod.rs` — `pub mod` + `pub use` for all five instruction files. Index only.
+- `[x]` `programs/stocksie/src/instructions/mod.rs` — `pub mod` + `pub use` for all five instruction files. Index only.
 
 **Next up**: **Phase 5** — `programs/stocksie/src/lib.rs`.
 
 ---
 
-## Phase 5 — `lib.rs` dispatch wiring `[ ]`
+## Phase 5 — `lib.rs` dispatch wiring `[x]`
 
 **Goal**: the `#[program]` module forwards every instruction to its handler.
 
 **Files**:
-- `[ ]` `programs/stocksie/src/lib.rs` — module declarations + 14-instruction `#[program]` block.
+- `[x]` `programs/stocksie/src/lib.rs` — module declarations + 14-instruction `#[program]` block.
 
 **Done when**:
-- `[ ]` `declare_id!` matches `Anchor.toml` and the keypair (`At2vd5...`).
-- `[ ]` All 14 instructions from `04_instructions.md` are declared.
-- `[ ]` Each is a one-line forwarder to its `*_handler`.
-- `[ ]` No business logic in `lib.rs` (architecture rule).
+- `[x]` `declare_id!` matches `Anchor.toml` and the keypair (`At2vd5...`).
+- `[x]` All 14 instructions from `04_instructions.md` are declared.
+- `[x]` Each is a one-line forwarder to its `*_handler`.
+- `[x]` No business logic in `lib.rs` (architecture rule).
 
 **Next up**: **Phase 6** — first clean build.
 
 ---
 
-## Phase 6 — First clean build `[ ]`
+## Phase 6 — First clean build `[x]`
 
 **Goal**: the whole program compiles to SBF and the IDL generates.
 
 **Done when**:
-- `[ ]` `anchor build` exits 0.
-- `[ ]` `target/deploy/stocksie.so` exists and is fresh.
-- `[ ]` `target/idl/stocksie.json` exists and lists all 14 instructions + 3 accounts + 11 events.
-- `[ ]` `target/types/stocksie.ts` exists.
-- `[ ]` No compiler warnings (run `cargo clippy --fix --allow-dirty` to clear them).
-- `[ ]` `cargo test -p stocksie --lib` (pure unit tests) still passes.
+- `[x]` `anchor build` exits 0.
+- `[x]` `target/deploy/stocksie.so` exists and is fresh.
+- `[x]` `target/idl/stocksie.json` exists and lists all 14 instructions + 3 accounts + 11 events.
+- `[x]` `target/types/stocksie.ts` exists.
+- `[x]` No compiler warnings (run `cargo clippy --fix --allow-dirty` to clear them).
+- `[x]` `cargo test -p stocksie --lib` (pure unit tests) still passes.
 
 **Verification**:
 ```sh
@@ -298,19 +298,19 @@ cargo test -p stocksie --lib
 
 ---
 
-## Phase 7 — LiteSVM harness + smoke `[ ]`
+## Phase 7 — LiteSVM harness + smoke `[x]`
 
 **Goal**: a reusable harness and one end-to-end smoke test that proves the build is testable.
 
 **Files**:
-- `[ ]` `programs/stocksie/tests/helpers/mod.rs` — `setup_svm`, `derive_household`, `derive_member`, `derive_request`, `send`, `emitted_events`, `assert_error_code`.
-- `[ ]` `programs/stocksie/tests/test_household.rs` — the §3.2 tests (init, add/remove, set_role).
-- `[ ]` Delete the template `programs/stocksie/tests/test_initialize.rs` (no longer relevant).
+- `[x]` `programs/stocksie/tests/helpers/mod.rs` — `setup_svm`, `derive_household`, `derive_member`, `derive_request`, `send`, `emitted_events`, `assert_error_code`.
+- `[x]` `programs/stocksie/tests/test_household.rs` — the §3.2 tests (init, add/remove, set_role).
+- `[x]` Delete the template `programs/stocksie/tests/test_initialize.rs` (no longer relevant).
 
 **Done when**:
-- `[ ]` `setup_svm()` loads the `.so` and airdrops 100 SOL to the payer.
-- `[ ]` `initialize_household_creates_pdas` passes — proves the full harness works.
-- `[ ]` At least 3 more `test_household.rs` cases pass (init emits two events, add_member increments count, remove_member refunds rent).
+- `[x]` `setup_svm()` loads the `.so` and airdrops 100 SOL to the payer.
+- `[x]` `initialize_household_creates_pdas` passes — proves the full harness works.
+- `[x]` At least 3 more `test_household.rs` cases pass (init emits two events, add_member increments count, remove_member refunds rent).
 
 **Verification**:
 ```sh
@@ -321,20 +321,20 @@ anchor build && cargo test -p stocksie --test test_household
 
 ---
 
-## Phase 8 — Lifecycle + permission tests `[ ]`
+## Phase 8 — Lifecycle + permission tests `[x]`
 
 **Goal**: full happy path + every permission gate and every negative case from `08_testing.md` §3.4–§3.6.
 
 **Files**:
-- `[ ]` `tests/test_lifecycle.rs` — §3.4 happy path + reconciliation.
-- `[ ]` `tests/test_permissions.rs` — §3.5 role gates, self-approval, non-buyer, status violations.
-- `[ ]` `tests/test_reimburse.rs` — §3.5 over-ceiling, zero, double, insufficient-vault.
-- `[ ]` `tests/test_rewards.rs` — §3.6 award/summary + reward reconciliation.
+- `[x]` `tests/test_lifecycle.rs` — §3.4 happy path + reconciliation.
+- `[x]` `tests/test_permissions.rs` — §3.5 role gates, self-approval, non-buyer, status violations.
+- `[x]` `tests/test_reimburse.rs` — §3.5 over-ceiling, zero, double, insufficient-vault.
+- `[x]` `tests/test_rewards.rs` — §3.6 award/summary + reward reconciliation.
 
 **Done when**:
-- `[ ]` `full_lifecycle_reaches_reimbursed` passes with balance assertions on vault and buyer.
-- `[ ]` Every `StocksieError` variant is asserted by at least one test.
-- `[ ]` Every forbidden transition in `05_state_machine.md` §4 is covered.
+- `[x]` `full_lifecycle_reaches_reimbursed` passes with balance assertions on vault and buyer.
+- `[x]` Every `StocksieError` variant is asserted by at least one test.
+- `[x]` Every forbidden transition in `05_state_machine.md` §4 is covered.
 
 **Verification**:
 ```sh
@@ -423,17 +423,17 @@ cargo clippy --all-targets -- -D warnings
 
 ---
 
-## Phase 12 — Handover + commit `[ ]`
+## Phase 12 — Handover + commit `[x]`
 
 **Goal**: capture the state of the MVP for the next session and lock it in git.
 
 **Files**:
-- `[ ]` `.handovers/001_stocksie_mvp.md` — what happened, where the plan/code/tests live, reflection (struggles + solutions), remaining work, issue refs, how to dev/test. (Per project workflow rule.)
+- `[x]` `.handovers/002_stocksie_mvp.md` — what happened, where the plan/code/tests live, reflection (struggles + solutions), remaining work, issue refs, how to dev/test. (Per project workflow rule.)
 
 **Done when**:
-- `[ ]` Handover doc written.
-- `[ ]` Final commit on `develop/feature/01_household_program` with conventional message (e.g. `feat: stocksie MVP — household, vault, purchase lifecycle, rewards`).
-- `[ ]` PR opened (or branch pushed) to `develop`.
+- `[x]` Handover doc written.
+- `[x]` Final commit on `develop/feature/01_household_program` with conventional message (e.g. `feat: stocksie MVP — household, vault, purchase lifecycle, rewards`).
+- `[ ]` PR to `develop` — **not yet opened**. Branch `develop/feature/01_household_program` is committed and ready (handover doc + final commit land in this phase); opening the PR is the one explicit follow-up.
 
 ---
 
@@ -462,6 +462,6 @@ cargo clippy --all-targets -- -D warnings
 
 ## Next up
 
-- Finish the plan folder: **`plan/10_docs.md`** (the last plan file).
-- Commit the plan folder.
-- Resume implementation at **Phase 4b**: `programs/stocksie/src/instructions/funds.rs`.
+- **MVP complete.** All 12 phases done; 75/75 tests green; 9-doc set shipped (Phase 11); this tracker's statuses reconciled to match committed reality (Phase 12).
+- Open a PR: `develop/feature/01_household_program` → `develop` (review the 9-doc set + the `002_stocksie_mvp.md` handover + this tracker reconciliation).
+- Follow-ups (non-blocking, see `docs/SECURITY.md` §11): add `aliased_vault_debit_rejected` + `overflow_returns_error` dedicated tests — defenses exist, dedicated tests do not.
