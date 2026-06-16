@@ -92,11 +92,7 @@ pub struct PurchaseRequest {
 
 impl PurchaseRequest {
     /// Seeds helper used at `init` (constraint) and for re-derivation.
-    pub fn seeds<'a>(
-        household: &'a Pubkey,
-        request_id: u64,
-        bump: &'a [u8],
-    ) -> Vec<Vec<u8>> {
+    pub fn seeds<'a>(household: &'a Pubkey, request_id: u64, bump: &'a [u8]) -> Vec<Vec<u8>> {
         // Allocated as Vec<Vec<u8>> so callers can build a &[&[u8]] slice
         // without lifetime gymnastics over a stack-local `to_le_bytes` array.
         vec![
@@ -150,10 +146,9 @@ impl PurchaseRequest {
                 self.restocked_slot = now;
                 Ok(Status::Restocked)
             }
-            Status::Pending
-            | Status::Restocked
-            | Status::Reimbursed
-            | Status::Rejected => Err(StocksieError::InvalidStatusTransition.into()),
+            Status::Pending | Status::Restocked | Status::Reimbursed | Status::Rejected => {
+                Err(StocksieError::InvalidStatusTransition.into())
+            }
         }
     }
 
@@ -197,8 +192,6 @@ impl PurchaseRequest {
     }
 }
 
-
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -229,7 +222,10 @@ mod tests {
         assert_eq!(r.approved_slot, 100);
         assert_eq!(r.transition_restocked(200).unwrap(), Status::Restocked);
         assert_eq!(r.restocked_slot, 200);
-        assert_eq!(r.transition_reimbursed(900_000).unwrap(), Status::Reimbursed);
+        assert_eq!(
+            r.transition_reimbursed(900_000).unwrap(),
+            Status::Reimbursed
+        );
         assert_eq!(r.reimbursed_amount, 900_000);
         assert!(r.is_reimbursed());
         assert!(r.status.is_terminal());

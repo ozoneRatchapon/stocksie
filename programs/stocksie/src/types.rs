@@ -12,16 +12,7 @@ use anchor_lang::prelude::*;
 ///
 /// Ordering is intentional: privilege decreases as the discriminant grows,
 /// which keeps "at least Parent" style checks readable.
-#[derive(
-    Copy,
-    Clone,
-    Debug,
-    PartialEq,
-    Eq,
-    AnchorSerialize,
-    AnchorDeserialize,
-    InitSpace,
-)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq, AnchorSerialize, AnchorDeserialize, InitSpace)]
 pub enum Role {
     /// Full control: create household, manage members, approve/reject spending,
     /// reimburse buyers, withdraw vault funds, award arbitrary points.
@@ -89,16 +80,7 @@ impl Role {
 ///    └──────reject─────────┴──▶ Rejected   (terminal)
 ///                                         Reimbursed (terminal)
 /// ```
-#[derive(
-    Copy,
-    Clone,
-    Debug,
-    PartialEq,
-    Eq,
-    AnchorSerialize,
-    AnchorDeserialize,
-    InitSpace,
-)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq, AnchorSerialize, AnchorDeserialize, InitSpace)]
 pub enum Status {
     /// Just created by a member; awaiting an approver's review.
     Pending,

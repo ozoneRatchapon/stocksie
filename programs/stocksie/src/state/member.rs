@@ -58,11 +58,7 @@ pub struct Member {
 impl Member {
     /// Seeds helper used both at `init` (constraint) and for re-derivation in
     /// instructions that need to verify membership off the accounts struct.
-    pub fn seeds<'a>(
-        household: &'a Pubkey,
-        wallet: &'a Pubkey,
-        bump: &'a [u8],
-    ) -> [&'a [u8]; 4] {
+    pub fn seeds<'a>(household: &'a Pubkey, wallet: &'a Pubkey, bump: &'a [u8]) -> [&'a [u8]; 4] {
         [MEMBER_SEED, household.as_ref(), wallet.as_ref(), bump]
     }
 
@@ -162,5 +158,4 @@ mod tests {
         m.reactivate();
         assert!(m.can_approve());
     }
-
 }

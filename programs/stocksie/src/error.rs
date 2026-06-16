@@ -12,7 +12,6 @@ pub enum StocksieError {
     // ---------------------------------------------------------------------
     // Membership & role authorization
     // ---------------------------------------------------------------------
-
     /// Caller is not an active member of the household.
     #[msg("Caller is not an active member of this household")]
     NotAMember,
@@ -48,7 +47,6 @@ pub enum StocksieError {
     // ---------------------------------------------------------------------
     // Household invariant violations
     // ---------------------------------------------------------------------
-
     /// Account passed as household does not match the expected PDA.
     #[msg("Household account does not match the expected PDA")]
     HouseholdAccountMismatch,
@@ -60,7 +58,6 @@ pub enum StocksieError {
     // ---------------------------------------------------------------------
     // Vault / funds (Feature 2.4 & 3.2)
     // ---------------------------------------------------------------------
-
     /// Vault has insufficient lamports to satisfy the operation.
     #[msg("Household vault has insufficient funds")]
     InsufficientVaultFunds,
@@ -84,7 +81,6 @@ pub enum StocksieError {
     // ---------------------------------------------------------------------
     // Purchase request lifecycle (Feature 2.2 & 3.3)
     // ---------------------------------------------------------------------
-
     /// Purchase request is in a state that does not allow this transition.
     #[msg("Purchase request is not in the required state for this action")]
     InvalidStatusTransition,
@@ -112,7 +108,6 @@ pub enum StocksieError {
     // ---------------------------------------------------------------------
     // Rewards (Feature 2.5)
     // ---------------------------------------------------------------------
-
     /// Reward amount must be greater than zero.
     #[msg("Reward amount must be greater than zero")]
     ZeroReward,
@@ -124,7 +119,6 @@ pub enum StocksieError {
     // ---------------------------------------------------------------------
     // Numeric / arithmetic safety net
     // ---------------------------------------------------------------------
-
     /// Checked arithmetic overflow.
     #[msg("Arithmetic overflow")]
     Overflow,

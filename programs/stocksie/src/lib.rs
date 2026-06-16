@@ -50,11 +50,7 @@ pub mod stocksie {
         household::remove_member_handler(ctx, member_wallet)
     }
 
-    pub fn set_role(
-        ctx: Context<SetRole>,
-        new_role: Role,
-        member_wallet: Pubkey,
-    ) -> Result<()> {
+    pub fn set_role(ctx: Context<SetRole>, new_role: Role, member_wallet: Pubkey) -> Result<()> {
         household::set_role_handler(ctx, new_role, member_wallet)
     }
 
@@ -97,10 +93,7 @@ pub mod stocksie {
         purchase::reject_purchase_request_handler(ctx, reason_hash)
     }
 
-    pub fn confirm_restock(
-        ctx: Context<ConfirmRestock>,
-        unit_cost_hash: [u8; 32],
-    ) -> Result<()> {
+    pub fn confirm_restock(ctx: Context<ConfirmRestock>, unit_cost_hash: [u8; 32]) -> Result<()> {
         purchase::confirm_restock_handler(ctx, unit_cost_hash)
     }
 

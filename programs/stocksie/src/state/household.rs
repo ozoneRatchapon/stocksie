@@ -74,7 +74,11 @@ impl Household {
         // lifetime `'a`, producing a one-element `&'a [u8]`. The naive
         // `&[self.bump]` would create a temporary array and return a dangling
         // reference to it (E0515).
-        [HOUSEHOLD_SEED, owner.as_ref(), std::slice::from_ref(&self.bump)]
+        [
+            HOUSEHOLD_SEED,
+            owner.as_ref(),
+            std::slice::from_ref(&self.bump),
+        ]
     }
 
     /// Credit lamports into the vault from an external `from` account and
@@ -93,10 +97,7 @@ impl Household {
         anchor_lang::system_program::transfer(
             CpiContext::new(
                 system_program.key(),
-                anchor_lang::system_program::Transfer {
-                    from,
-                    to: vault,
-                },
+                anchor_lang::system_program::Transfer { from, to: vault },
             ),
             lamports,
         )?;
@@ -139,10 +140,14 @@ impl Household {
         // option here. Debit the source first, credit the destination second;
         // both `RefMut<&mut u64>` borrows resolve cleanly because the accounts
         // are guaranteed distinct by the alias check above.
-        **vault.try_borrow_mut_lamports()? =
-            vault.lamports().checked_sub(lamports).ok_or(StocksieError::Overflow)?;
-        **to.try_borrow_mut_lamports()? =
-            to.lamports().checked_add(lamports).ok_or(StocksieError::Overflow)?;
+        **vault.try_borrow_mut_lamports()? = vault
+            .lamports()
+            .checked_sub(lamports)
+            .ok_or(StocksieError::Overflow)?;
+        **to.try_borrow_mut_lamports()? = to
+            .lamports()
+            .checked_add(lamports)
+            .ok_or(StocksieError::Overflow)?;
 
         self.vault_balance = self
             .vault_balance

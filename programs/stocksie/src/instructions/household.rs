@@ -262,10 +262,7 @@ pub struct RemoveMember<'info> {
 ///
 /// `member_count` decrement uses checked subtraction; the Owner-removal and
 /// self-removal cases are blocked upstream by the accounts constraints.
-pub fn remove_member_handler(
-    ctx: Context<RemoveMember>,
-    member_wallet: Pubkey,
-) -> Result<()> {
+pub fn remove_member_handler(ctx: Context<RemoveMember>, member_wallet: Pubkey) -> Result<()> {
     let household = &mut ctx.accounts.household;
     household.member_count = household
         .member_count
