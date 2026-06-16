@@ -108,10 +108,24 @@ pub struct ReimburseBuyer<'info> {
     )]
     pub buyer_member: Account<'info, Member>,
 
-    /// The wallet receiving the SOL reimbursement. Must equal the request's
-    /// recorded `buyer`. Not a signer — the approver authorizes; the buyer
-    /// merely receives. `mut` because lamports are credited here by
-    /// `debit_vault`.
+    /// CHECK: This is the SOL reimbursement recipient — the wallet that the
+    /// recorded `request.buyer` points at. It is intentionally not a typed
+    /// account: in `reimburse_buyer`, the caller is the *approver* (Owner/
+    /// Parent) and the buyer merely *receives* lamports, so the buyer neither
+    /// signs nor needs to own any program state. The two safety properties
+    /// that matter are enforced inline:
+    ///   1. The address is bound to the request's recorded buyer via the
+    ///      `constraint = buyer.key() == request.buyer @ StocksieError::NotBuyer`
+    ///      check below — an attacker cannot redirect the payout to any other
+    ///      wallet.
+    ///   2. `buyer_member` (the Member PDA seeded from the *stored*
+    ///      `request.buyer`) and `request.buyer == buyer.key()` together prove
+    ///      the recipient is an active member of this household whose wallet
+    ///      matches the recorded buyer — i.e. the recipient is exactly who the
+    ///      request says shopped.
+    ///
+    /// Lamports are only *credited* here (by `Household::debit_vault`), never
+    /// read, so there is no data-deserialization trust either.
     #[account(
         mut,
         constraint = buyer.key() == request.buyer @ StocksieError::NotBuyer,

@@ -4,8 +4,6 @@
 //! modules and re-export their public items, nothing else). The actual
 //! instruction account structs and handlers live in sibling files, grouped by
 //! domain:
-//!   - [`initialize`]: the scaffold template handler (replaced incrementally as
-//!     the real instruction set is wired into `lib.rs`).
 //!   - [`household`]: the membership lifecycle — `initialize_household`,
 //!     `add_member`, `remove_member`, `set_role` (Feature 3.3).
 //!   - [`funds`]: the shared treasury in/out flows — `deposit_funds` (any
@@ -31,14 +29,12 @@
 
 pub mod funds;
 pub mod household;
-pub mod initialize;
 pub mod purchase;
 pub mod reimburse;
 pub mod rewards;
 
 pub use funds::*;
 pub use household::*;
-pub use initialize::*;
 pub use purchase::*;
 pub use reimburse::*;
 pub use rewards::*;
