@@ -14,7 +14,7 @@
 //! Privacy (Feature 3.5): no PII is stored. `wallet` is a pubkey; everything
 //! else (display name, avatar, age, etc.) lives off-chain.
 
-use crate::constants::{HASH_LEN, MEMBER_SEED};
+use crate::constants::MEMBER_SEED;
 use crate::error::StocksieError;
 use crate::types::Role;
 use anchor_lang::prelude::*;
@@ -163,6 +163,4 @@ mod tests {
         assert!(m.can_approve());
     }
 
-    // Silence unused-import warning for HASH_LEN when only unit helpers run.
-    const _HASH_LEN: usize = HASH_LEN;
 }

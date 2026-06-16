@@ -46,7 +46,6 @@ pub struct HouseholdCreated {
     /// Wallet that owns the household and vault.
     pub owner: Pubkey,
     /// blake3 hash of the household's display name. Privacy reference only.
-    #[index]
     pub name_hash: [u8; 32],
     /// Slot at which the household was created (audit ordering).
     pub slot: u64,
@@ -130,7 +129,6 @@ pub struct PurchaseCreated {
     /// Wallet designated as the buyer (receives the later reimbursement).
     pub buyer: Pubkey,
     /// Monotonic per-household request id (used in PDA seeds).
-    #[index]
     pub request_id: u64,
     /// Requested spend in lamports.
     pub amount: u64,
@@ -214,7 +212,6 @@ pub struct RewardEarned {
     /// Member's cumulative reward total after this credit.
     pub total_points: u64,
     /// blake3 hash of the human-readable reason. Privacy reference only.
-    #[index]
     pub reason_hash: [u8; 32],
     pub slot: u64,
 }

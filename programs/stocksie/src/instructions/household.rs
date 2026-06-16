@@ -1,4 +1,3 @@
-stocksie/programs/stocksie/src/instructions/household.rs#L1-450
 //! Household-management instructions.
 //!
 //! Covers the membership lifecycle (Feature 3.3 — access-controlled state

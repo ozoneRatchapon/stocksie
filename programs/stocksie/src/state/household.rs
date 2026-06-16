@@ -70,7 +70,11 @@ impl Household {
     /// transfer to a buyer during reimbursement). Caller already holds the
     /// stored canonical `bump`.
     pub fn signer_seeds<'a>(&'a self, owner: &'a Pubkey) -> [&'a [u8]; 3] {
-        [HOUSEHOLD_SEED, owner.as_ref(), &[self.bump]]
+        // `std::slice::from_ref` borrows `self.bump` (part of `&'a self`) for
+        // lifetime `'a`, producing a one-element `&'a [u8]`. The naive
+        // `&[self.bump]` would create a temporary array and return a dangling
+        // reference to it (E0515).
+        [HOUSEHOLD_SEED, owner.as_ref(), std::slice::from_ref(&self.bump)]
     }
 
     /// Credit lamports into the vault from an external `from` account and
@@ -79,16 +83,16 @@ impl Household {
     /// Uses the system program's transfer CPI rather than raw lamport moves so
     /// the source account is properly debited under the runtime's ownership
     /// rules (`from` must be a system-owned signer).
-    pub fn credit_vault(
+    pub fn credit_vault<'info>(
         &mut self,
-        from: AccountInfo<'_>,
-        vault: AccountInfo<'_>,
-        system_program: AccountInfo<'_>,
+        from: AccountInfo<'info>,
+        vault: AccountInfo<'info>,
+        system_program: AccountInfo<'info>,
         lamports: u64,
     ) -> Result<()> {
         anchor_lang::system_program::transfer(
             CpiContext::new(
-                system_program,
+                system_program.key(),
                 anchor_lang::system_program::Transfer {
                     from,
                     to: vault,
