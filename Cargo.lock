@@ -3674,6 +3674,7 @@ dependencies = [
  "base64 0.22.1",
  "blake3",
  "litesvm",
+ "solana-account",
  "solana-instruction",
  "solana-keypair",
  "solana-message",

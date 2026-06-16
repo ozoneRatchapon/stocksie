@@ -152,7 +152,7 @@ pub struct PurchaseRequest {
     pub bump: u8,                   //  1  — canonical PDA bump
     pub created_slot: u64,          //  8  — audit ordering
 }
-// INIT_SPACE = 226 bytes; on-chain size = 8 (disc) + 226 = 234 bytes
+// INIT_SPACE = 218 bytes; on-chain size = 8 (disc) + 218 = 226 bytes
 ```
 
 ### Field rationale
@@ -196,7 +196,7 @@ Sizes are computed by Anchor's `#[derive(InitSpace)]` and verified in the unit t
 | --- | ---: | ---: | ---: | --- |
 | `Household` | 101 B | 109 B | ~1,649,520 lamports (~0.00165 SOL) | Paid by `owner` at `init`. |
 | `Member` | 83 B | 91 B | ~1,524,240 lamports (~0.00152 SOL) | Paid by caller at `add_member`; refunded to caller at `close`. |
-| `PurchaseRequest` | 226 B | 234 B | ~2,519,520 lamports (~0.00252 SOL) | Paid by creator at `create_purchase_request`; refunded at `close_purchase_request`. |
+| `PurchaseRequest` | 218 B | 226 B | ~2,463,840 lamports (~0.00246 SOL) | Paid by creator at `create_purchase_request`; refunded at `close_purchase_request`. |
 
 ### Rent-exempt formula
 
@@ -207,7 +207,7 @@ Solana's rent-exempt minimum for an account of on-chain size `S` is `(S + 128) *
 Spot-checks:
 - `Household`: `(109 + 128) × 6960 = 237 × 6960 = 1,649,520` ✓
 - `Member`: `(91 + 128) × 6960 = 219 × 6960 = 1,524,240` ✓
-- `PurchaseRequest`: `(234 + 128) × 6960 = 362 × 6960 = 2,519,520` ✓
+- `PurchaseRequest`: `(226 + 128) × 6960 = 354 × 6960 = 2,463,840` ✓
 
 The numbers above are **targets the implementation must match**; if `INIT_SPACE` drifts (e.g. a field is added), update this table and the `test_space_budget` assertion together.
 
@@ -222,7 +222,7 @@ Member × 16       1456 B   (16 × 91)
 Total            1565 B   ≈ 0.022 SOL rent locked
 ```
 
-Plus one `PurchaseRequest` (234 B ≈ 0.0025 SOL) for every open/unclosed request. Closable lifecycle keeps long-tail rent bounded: closed requests and removed members refund their rent.
+Plus one `PurchaseRequest` (226 B ≈ 0.0025 SOL) for every open/unclosed request. Closable lifecycle keeps long-tail rent bounded: closed requests and removed members refund their rent.
 
 ---
 
