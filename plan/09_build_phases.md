@@ -395,20 +395,29 @@ cargo clippy --all-targets -- -D warnings
 
 ---
 
-## Phase 11 — Docs `[ ]`
+## Phase 11 — Docs `[x]`
 
 **Goal**: a reader can understand, build, test, and extend Stocksie from the repo alone.
 
-**Files** (per `10_docs.md`):
-- `[ ]` `README.md` — overview, build/test commands, architecture summary, status.
-- `[ ]` `docs/ARCHITECTURE.md` — developer-facing deep-dive (from `plan/02`).
-- `[ ]` `docs/SECURITY.md` — security review checklist (from `plan/07`).
-- `[ ]` `docs/TESTING.md` — how to run tests, what each file covers (from `plan/08`).
-- `[ ]` `docs/PRIVACY.md` — the on-chain/off-chain boundary (from `plan/03` §6 and `plan/06` §2).
+**Files** — full 9-doc spec delivered (per `plan/10_docs.md` §2 catalog; the
+5-doc list below was an under-count in this tracker — see `.plans/003_phase11_docs.md` §8):
+- `[x]` `README.md` — overview, build/test commands, architecture summary, status.
+- `[x]` `docs/ARCHITECTURE.md` — developer-facing deep-dive (from `plan/02`).
+- `[x]` `docs/ACCOUNTS.md` — account catalog + state machine (from `plan/03`/`05`).
+- `[x]` `docs/INSTRUCTIONS.md` — full on-chain instruction surface (from `plan/04`/`06`).
+- `[x]` `docs/SECURITY.md` — security review checklist (from `plan/07`).
+- `[x]` `docs/TESTING.md` — how to run tests, what each file covers (from `plan/08`).
+- `[x]` `docs/PRIVACY.md` — the on-chain/off-chain boundary (from `plan/03` §6 and `plan/06` §2).
+- `[x]` `docs/ROADMAP.md` — MVP scope + future horizons (from `plan/01` §5 and `plan/10` §3.8).
+- `[x]` `CHANGELOG.md` — release log (Keep a Changelog format).
 
 **Done when**:
-- `[ ]` `README.md` has a working quickstart (`anchor build`, `anchor test`).
-- `[ ]` Every plan file's content has a corresponding doc or section.
+- `[x]` `README.md` has a working quickstart (`anchor build`, `cargo test -p stocksie` → 75 passed, 0 failed).
+- `[x]` Every plan file's content has a corresponding doc or section.
+- `[x]` Every code reference points to real source at HEAD; every shell command verified copy-pasteable.
+- `[x]` Every security claim backed by a named test from the 75-test suite (or marked "code review").
+- `[x]` Privacy boundary stated identically in `README.md`, `docs/ARCHITECTURE.md`, `docs/INSTRUCTIONS.md`, `docs/PRIVACY.md` — no drift.
+- `[x]` All 9 docs pass `prettier --check`; zero `TODO`/`FIXME`/`TBD`.
 
 **Next up**: **Phase 12** — handover doc + commit.
 
