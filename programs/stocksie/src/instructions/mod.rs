@@ -20,6 +20,9 @@
 //!     `reimburse_buyer` moves `Restocked → Reimbursed` and pays the buyer out
 //!     of the shared household vault, completing the purchase lifecycle
 //!     (Features 2.2, 2.4, 3.2, 3.4).
+//!   - [`rewards`]: the gamification audit-stream ops — `award_reward`
+//!     (Owner/Parent manual point grant to any active member) and
+//!     `reward_summary` (read-only score emit) (Feature 2.5).
 //!
 //! Each handler is the *only* place business rules that cannot be expressed as
 //! Anchor constraints are enforced (e.g. zero-amount rejection, defense-in-depth
@@ -31,9 +34,11 @@ pub mod household;
 pub mod initialize;
 pub mod purchase;
 pub mod reimburse;
+pub mod rewards;
 
 pub use funds::*;
 pub use household::*;
 pub use initialize::*;
 pub use purchase::*;
 pub use reimburse::*;
+pub use rewards::*;
