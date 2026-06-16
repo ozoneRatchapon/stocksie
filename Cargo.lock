@@ -3671,12 +3671,15 @@ name = "stocksie"
 version = "0.1.0"
 dependencies = [
  "anchor-lang",
+ "base64 0.22.1",
  "blake3",
  "litesvm",
+ "solana-instruction",
  "solana-keypair",
  "solana-message",
  "solana-signer",
  "solana-transaction",
+ "solana-transaction-error",
 ]
 
 [[package]]

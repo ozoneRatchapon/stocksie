@@ -28,11 +28,20 @@ anchor-lang = "1.0.2"
 blake3 = "1"
 
 [dev-dependencies]
+# `base64` decodes the `Program data: <base64>` log lines Anchor emits for
+# events, so the harness can decode and shape-check `HouseholdCreated` etc.
+base64 = "0.22"
 litesvm = "0.10.0"
 solana-message = "3.0.1"
 solana-transaction = "3.0.2"
 solana-signer = "3.0.0"
 solana-keypair = "3.0.1"
+# `solana-instruction` + `solana-transaction-error` are pinned to match
+# `litesvm`'s own deps (3.0 / 3.0.0) so `TransactionError::InstructionError(_,
+# InstructionError::Custom(n))` pattern-matching in `assert_error_code` lines
+# up type-for-type with `FailedTransactionMetadata.err` (no version drift).
+solana-instruction = "3.0"
+solana-transaction-error = "3.0.0"
 
 
 [lints.rust]
