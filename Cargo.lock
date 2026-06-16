@@ -3671,6 +3671,7 @@ name = "stocksie"
 version = "0.1.0"
 dependencies = [
  "anchor-lang",
+ "blake3",
  "litesvm",
  "solana-keypair",
  "solana-message",

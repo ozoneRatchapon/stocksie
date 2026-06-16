@@ -22,6 +22,10 @@ custom-panic = []
 
 [dependencies]
 anchor-lang = "1.0.2"
+# blake3 is used for reward `reason_hash` computation (Feature 2.5 / 3.5 —
+# privacy-preserving audit trail). Matches the project convention of preferring
+# blake3 over SHA-256. Pure-Rust core compiles cleanly to the Solana SBF target.
+blake3 = "1"
 
 [dev-dependencies]
 litesvm = "0.10.0"

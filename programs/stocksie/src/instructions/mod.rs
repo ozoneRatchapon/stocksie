@@ -11,6 +11,11 @@
 //!   - [`funds`]: the shared treasury in/out flows — `deposit_funds` (any
 //!     active member, Guest included) and `withdraw_funds` (Owner-only
 //!     emergency drain) against the household SOL vault (Feature 2.4 / 3.2).
+//!   - [`purchase`]: the shared shopping-list lifecycle — `create_purchase_request`,
+//!     `approve_purchase_request`, `reject_purchase_request`, `confirm_restock`,
+//!     `close_purchase_request` (Features 2.1, 2.2, 3.3). The strict state
+//!     machine (`Pending → Approved → Restocked → Reimbursed`, or `→ Rejected`)
+//!     is enforced by the `PurchaseRequest::transition_*` guards.
 //!
 //! Each handler is the *only* place business rules that cannot be expressed as
 //! Anchor constraints are enforced (e.g. zero-amount rejection, defense-in-depth
@@ -20,7 +25,9 @@
 pub mod funds;
 pub mod household;
 pub mod initialize;
+pub mod purchase;
 
 pub use funds::*;
 pub use household::*;
 pub use initialize::*;
+pub use purchase::*;
