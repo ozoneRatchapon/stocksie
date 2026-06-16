@@ -156,7 +156,7 @@ stocksie/
         ├── lib.rs              # declare_id! + #[program] dispatch (thin)
         ├── constants.rs        # seeds, reward schedule, size limits
         ├── error.rs            # StocksieError enum
-        ├── events.rs           # 11 #[event] structs (audit trail)
+        ├── events.rs           # 12 #[event] structs (audit trail)
         ├── types.rs            # Role, Status + permission helpers
         ├── state/              # Household, Member, PurchaseRequest + logic
         └── instructions/       # household, funds, purchase, reimburse, rewards
@@ -169,8 +169,8 @@ stocksie/
 
 ## Status
 
-Phases 0–11 complete: the program ships all 14 instructions across the
-household / funds / purchase / reimburse / rewards groups, all 11 events, and a
+Phases 0–12 complete: the program ships all 14 instructions across the
+household / funds / purchase / reimburse / rewards groups, all 12 events, and a
 75-test LiteSVM suite covering lifecycle, permissions, reimbursement edge cases,
 security defenses, cross-cutting invariants, the privacy grep, and the space
 budget. See [plan/09_build_phases.md](plan/09_build_phases.md) for the per-phase

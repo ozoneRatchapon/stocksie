@@ -33,7 +33,7 @@ per-phase tracker.
 - [x] **Rewards / gamification** — `award_reward` (Owner/Parent manual grant to any
       active member), `reward_summary` (read-only sentinel emit). Auto-rewards at
       low-stock report (+10), restock (+25), full run (+15).
-- [x] **11 events** forming the tamper-proof audit trail (`HouseholdCreated`,
+- [x] **12 events** forming the tamper-proof audit trail (`HouseholdCreated`,
       `MemberAdded`, `MemberRemoved`, `RoleChanged`, `FundsDeposited`,
       `FundsWithdrawn`, `PurchaseCreated`, `PurchaseApproved`, `PurchaseRejected`,
       `Restocked`, `Reimbursed`, `RewardEarned`).

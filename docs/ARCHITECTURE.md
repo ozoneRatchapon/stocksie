@@ -119,7 +119,7 @@ stocksie/
 │       ├── lib.rs              # declare_id! + #[program] dispatch (thin)
 │       ├── constants.rs        # seeds, reward schedule, size limits
 │       ├── error.rs            # StocksieError enum
-│       ├── events.rs           # 11 #[event] structs (audit trail)
+│       ├── events.rs           # 12 #[event] structs (audit trail)
 │       ├── types.rs            # Role, Status + permission helpers
 │       ├── state/
 │       │   ├── mod.rs          # index only (re-exports)
