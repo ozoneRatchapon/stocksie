@@ -371,16 +371,18 @@ Full suite, target <10s wall-clock.
 
 ---
 
-## Phase 10 — Lint, clippy, fmt, autofixer `[ ]`
+## Phase 10 — Lint, clippy, fmt, autofixer `[x]`
 
 **Goal**: the codebase is clean enough to ship.
 
 **Done when**:
-- `[ ]` `cargo fmt --all -- --check` passes.
-- `[ ]` `cargo clippy --all-targets -- -D warnings` passes.
-- `[ ]` `program_autofixer` reports no issues (run per project rule before final commit).
-- `[ ]` No `unwrap()` in non-test program code except where the project explicitly allows.
-- `[ ]` No dead-code warnings beyond unused client-surface items.
+- `[x]` `cargo fmt --all -- --check` passes. **Verified:** exit 0, zero formatting delta.
+- `[x]` `cargo clippy --all-targets -- -D warnings` passes. **Verified:** exit 0, no warnings, `--fix` applied zero changes.
+- `[x]` `program_autofixer` reports no issues (run per project rule before final commit). **Verified:** all 13 source files returned `issues: [], suggestions: []` (the 2 `mod.rs` index files have no account-validation logic).
+- `[x]` No `unwrap()` in non-test program code except where the project explicitly allows. **Verified:** every match confirmed inside `#[cfg(test)]` blocks or doc-comments via `#[cfg(test)]` boundary cross-reference.
+- `[x]` No dead-code warnings beyond unused client-surface items. **Verified:** none surfaced.
+
+**Regression:** `cargo test -p stocksie` reports **75 passed, 0 failed** (24 unit + 51 integration). No production source changes were required — Phase 10 was a clean confirmation sweep.
 
 **Verification**:
 ```sh
