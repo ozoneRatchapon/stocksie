@@ -16,6 +16,10 @@
 //!     `close_purchase_request` (Features 2.1, 2.2, 3.3). The strict state
 //!     machine (`Pending → Approved → Restocked → Reimbursed`, or `→ Rejected`)
 //!     is enforced by the `PurchaseRequest::transition_*` guards.
+//!   - [`reimburse`]: the trust-critical vault → buyer SOL transfer —
+//!     `reimburse_buyer` moves `Restocked → Reimbursed` and pays the buyer out
+//!     of the shared household vault, completing the purchase lifecycle
+//!     (Features 2.2, 2.4, 3.2, 3.4).
 //!
 //! Each handler is the *only* place business rules that cannot be expressed as
 //! Anchor constraints are enforced (e.g. zero-amount rejection, defense-in-depth
@@ -26,8 +30,10 @@ pub mod funds;
 pub mod household;
 pub mod initialize;
 pub mod purchase;
+pub mod reimburse;
 
 pub use funds::*;
 pub use household::*;
 pub use initialize::*;
 pub use purchase::*;
+pub use reimburse::*;

@@ -50,7 +50,11 @@ const REASON_RESTOCK: &[u8] = b"completed restock";
 /// Matches the `RewardEarned.reason_hash` contract: the ledger records *that*
 /// a reason existed and a deterministic handle for the UI to map back to a
 /// badge description, without ever storing the reason text on chain.
-fn hash_reason(reason: &[u8]) -> [u8; 32] {
+///
+/// `pub(crate)` because the same wrapper is reused by every instruction that
+/// emits a `RewardEarned` event (`purchase`, `reimburse`, `rewards`) so the
+/// blake3 → `[u8; 32]` mapping has exactly one definition (DRY).
+pub(crate) fn hash_reason(reason: &[u8]) -> [u8; 32] {
     *blake3::hash(reason).as_bytes()
 }
 
