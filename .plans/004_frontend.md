@@ -85,23 +85,41 @@ Program ID: `At2vd5Mqd9xcHRFAZin1VHb6upEsF1GCXoFG19UHsQoj`.
   `lib/adapters/localKeypairWalletAdapter.ts` (dev keypair fallback, localStorage
   persistence, full `SignerWalletAdapter` surface), `WalletModalProvider`,
   wallet-standard auto-detect of Phantom/Solflare/Backpack, `autoConnect`.
-- [ ] **Stage 4 — Instruction UI panels.** Components covering all 14
-  instructions grouped by domain: `HouseholdPanel` (initialize, add/remove
-  member, set role), `FundsPanel` (deposit, withdraw), `PurchasePanel`
-  (create, approve, reject, confirm restock, close), `ReimbursePanel`
-  (reimburse buyer), `RewardsPanel` (award reward, reward summary). Each panel
-  builds the instruction with resolved PDAs, signs, sends, and surfaces tx
-  signature + program errors. Production grade — no mocks, no TODOs.
-- [ ] **Stage 5 — Live state view.** `hooks/useHousehold.ts` (resolve + fetch
-  household / members / requests, poll on interval), `components/StateView.tsx`
-  rendering vault balance (lamports → SOL), member roster with roles +
-  reward points, and the purchase-request ledger with status badges. Refresh
-  after each confirmed transaction.
-- [ ] **Stage 6 — Surfpool integration docs.** `app/README.md` with the exact
-  runbook: `surfpool` (local mode) → `anchor deploy` to localnet → point the UI
-  at `http://127.0.0.1:8899` → connect Phantom to the local RPC (or use the
-  dev keypair fallback) → drive the lifecycle. Includes a `pnpm` script to
-  copy `target/idl/stocksie.json` into the app on each build.
+- [x] **Stage 4 — Instruction UI panels.** ✓ All 14 instructions across five
+  domain panels. `HouseholdPanel` (initialize, add/remove member, set role),
+  `FundsPanel` (deposit, withdraw), `PurchasePanel` (create, approve, reject,
+  confirm restock, close), `ReimbursePanel` (reimburse buyer), `RewardsPanel`
+  (award reward, reward summary). Each panel builds the instruction with
+  client-resolved PDAs via `.accountsStrict({...})`, signs + sends through a
+  `useTransaction` wrapper, and surfaces the tx signature (Explorer link +
+  copy) and extracted program/Anchor errors via a shared `ResultBanner`.
+  Owner-only and Owner/Parent sections gate their forms on the resolved
+  household owner. Shared infra: `ui/{Button,Field,Select,Badge,Panel,
+  ResultBanner,ConnectGate}`, `hooks/useHouseholdContext` (owner-pubkey →
+  household PDA resolution — handles the non-owner-member case), `lib/accounts`
+  (PDA bundle helpers), `lib/format` (lamports↔SOL float-free, pubkey
+  shortening, Anchor error extraction), `lib/parse`, `lib/cn`. No mocks, no
+  TODOs, no placeholders.
+- [x] **Stage 5 — Live state view.** ✓ `hooks/useHousehold.ts` (fetches
+  household via `fetchNullable` so an uninitialized household is a null, not
+  an error; polls members + purchase requests every 1.5s via `memcmp` on the
+  discriminator-adjacent `household` field at offset 8; refetches immediately
+  on the shared `useRefresh` nonce after any confirmed write).
+  `components/StateView.tsx` renders the vault balance (lamports → SOL via
+  float-free bigint math), the member roster (owner-first, role + reward
+  points + active badges), and the purchase-request ledger (newest-first,
+  status badges, spend ceiling, reimbursed amount, reward earned). Includes
+  the household-owner address field (override + reset), a manual refresh
+  button, and clear empty/error/loading states.
+- [x] **Stage 6 — Surfpool integration docs.** ✓ `app/README.md` with the
+  exact runbook: prerequisites, `surfpool local` → `solana airdrop` →
+  `anchor build && anchor deploy` → `pnpm -C app dev` → connect Phantom to
+  the local RPC (or the dev keypair fallback) → drive the 8-step happy-path
+  lifecycle. Includes the owner-vs-caller household-resolution explainer,
+  the project-layout tree, the npm-script table, the env-var reference, a
+  troubleshooting section, and security notes on the dev keypair + blake3
+  hashing. The `copy-idl` script (Stage 1) already syncs the IDL on every
+  `dev`/`build`/`typecheck`.
 
 ## 6. Target file tree
 
@@ -174,14 +192,59 @@ app/
   'error', ...)` initially emitted a plain `Error`; corrected to emit
   `WalletConnectionError` to satisfy the `WalletError`-typed event.
 
-## 9. Status
+## 9. Verification log (stages 4–6)
 
-Stages 1–3 complete and verified (`pnpm install`, `pnpm build`, `tsc` all green).
-Branch `feature/frontend` carries a scaffolded, production-building Next.js 15 +
-React 19 app with a typed Anchor 1.0 client and a dual-mode wallet layer
-(Wallet Standard extensions + dev keypair fallback). Not yet committed — pending
-a conventional commit once Stages 4–6 land (or on explicit request).
+- IDL ground-truth extracted programmatically via `jq` from
+  `target/idl/stocksie.json`: all 14 instruction account names (camelCased),
+  arg names + types, and the 3 account-struct field layouts (Household / Member /
+  PurchaseRequest). Confirmed `create_purchase_request`'s request PDA uses
+  `request_counter + 1` (read live off the household inside the submit thunk to
+  close the race window).
+- `@anchor-lang/core` 1.0.2 API surface confirmed against the installed type
+  definitions: `program.methods.<ix>(...).accountsStrict({...}).rpc()` builder,
+  `program.account.<type>.fetchNullable/.all` (with `memcmp` filters), and the
+  `AnchorError` / `ProgramError` shapes consumed by `extractErrorMessage`.
+- `tsc --noEmit` (`app/`) → **exit 0** (zero TS errors) after Stages 4–6.
+- `pnpm -C app build` → **exit 0** (`copy-idl` syncs both artifacts; `next build`
+  compiles, type-check passes, 4 static pages generated; main route 68.8 kB /
+  257 kB First Load JS).
+- Diagnostics resolved during the pass:
+  - `import type { PublicKey }` used as a value in 4 panels → switched to a
+    value import (the `tryParsePublicKey` helpers call `new PublicKey(...)`).
+  - `roleToAnchor` returned `Partial<Record<Role, …>>`, too loose for Anchor's
+    generated `DecodeEnum<…>` arg type → rebuilt `AnchorRole` as a precise
+    discriminated union (`AnchorEnumVariant` mapped helper) so
+    `program.methods.addMember(wallet, roleToAnchor(role))` type-checks without
+    a cast.
+  - `cn()` `ClassValue` union rejected `0` / `0n` (from `ReactNode`-typed
+    `suffix && 'cls'` expressions) → broadened to accept `number | bigint |
+    boolean` and filter falsy at runtime.
+  - DRY: `tryParsePublicKey` (4 copies) + `tryParseUint64` (3 copies) extracted
+    into `lib/parse.ts`; the four panels now import from there.
+- Post-write refetch wired without touching panel bodies: panels import
+  `useTransactionWithRefresh as useTransaction` from `useRefresh`, which binds
+  the shared `bump()` to each `useTransaction`'s `onConfirmed`. The `StateView`
+  reads `useRefresh().nonce` and passes it to `useHousehold`, which refetches
+  immediately on increment (in addition to its 1.5s poll).
 
-**Next:** Stage 4 (instruction UI panels) requires the per-instruction account
-names from `target/idl/stocksie.json` to build the `.accounts({...})` builders;
-those will be read from the IDL immediately before implementing each panel.
+## 10. Status
+
+All six stages complete and verified. Branch `feature/frontend` carries a full
+reference frontend: a typed Anchor 1.0 client, a dual-mode wallet layer (Wallet
+Standard + dev keypair), all 14 instruction panels with client-resolved PDAs +
+uniform tx-signature/error surfacing, a live state view (vault / roster /
+ledger) that polls and refetches on every confirmed write, and a Surfpool
+integration runbook.
+
+`cargo check -p stocksie` remains green — the on-chain program was not touched
+in this plan. Ready for a conventional commit on `feature/frontend`.
+
+**Definition of done (§7) status:**
+- ✅ `pnpm install` + `pnpm build` + `tsc --noEmit` all exit 0.
+- ⚠️ End-to-end happy path against a live Surfpool cluster: not yet executed in
+  this session (requires a running Surfpool + deployed program + manual wallet
+  interaction). The UI is wired to do so — see `app/README.md` §"Quick start"
+  for the exact runbook. All instruction builders, account resolution, and
+  state polling are implemented against the verified IDL ground-truth.
+- ✅ No `TODO`, no `FIXME`, no mock data, no placeholder text in shipped files.
+- ☐ Conventional commit on `feature/frontend` + plan checkboxes (this update).

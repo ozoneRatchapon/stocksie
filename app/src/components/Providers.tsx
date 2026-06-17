@@ -1,19 +1,24 @@
-'use client';
+"use client";
 
-import { Buffer } from 'buffer';
-import { useMemo } from 'react';
-import { ConnectionProvider, WalletProvider } from '@solana/wallet-adapter-react';
-import { WalletModalProvider } from '@solana/wallet-adapter-react-ui';
-import type { Adapter } from '@solana/wallet-adapter-base';
-import { LocalKeypairWalletAdapter } from '@/lib/adapters/localKeypairWalletAdapter';
-import { RPC_ENDPOINT, RPC_COMMITMENT } from '@/lib/constants';
-import '@solana/wallet-adapter-react-ui/styles.css';
+import { Buffer } from "buffer";
+import { useMemo } from "react";
+import {
+  ConnectionProvider,
+  WalletProvider,
+} from "@solana/wallet-adapter-react";
+import { WalletModalProvider } from "@solana/wallet-adapter-react-ui";
+import type { Adapter } from "@solana/wallet-adapter-base";
+import { LocalKeypairWalletAdapter } from "@/lib/adapters/localKeypairWalletAdapter";
+import { RPC_ENDPOINT, RPC_COMMITMENT } from "@/lib/constants";
+import { HouseholdContextProvider } from "@/hooks/useHouseholdContext";
+import { RefreshProvider } from "@/hooks/useRefresh";
+import "@solana/wallet-adapter-react-ui/styles.css";
 
 // `@solana/web3.js` v1 (used by the Anchor client and wallet adapter) expects a
 // global `Buffer` in the browser. Next.js 15 (webpack 5) does not polyfill Node
 // built-ins automatically, so install one once on the client before any Solana
 // code runs. Guards on `typeof window` keep this no-op during SSR.
-if (typeof window !== 'undefined' && !(window as { Buffer?: unknown }).Buffer) {
+if (typeof window !== "undefined" && !(window as { Buffer?: unknown }).Buffer) {
   (window as { Buffer: typeof Buffer }).Buffer = Buffer;
 }
 
@@ -33,12 +38,29 @@ if (typeof window !== 'undefined' && !(window as { Buffer?: unknown }).Buffer) {
  * `autoConnect` re-connects the last-used wallet on reload for smoother dev UX.
  */
 export function Providers({ children }: { children: React.ReactNode }) {
-  const wallets = useMemo<Adapter[]>(() => [new LocalKeypairWalletAdapter()], []);
+  const wallets = useMemo<Adapter[]>(
+    () => [new LocalKeypairWalletAdapter()],
+    []
+  );
 
   return (
-    <ConnectionProvider endpoint={RPC_ENDPOINT} config={{ commitment: RPC_COMMITMENT }}>
+    <ConnectionProvider
+      endpoint={RPC_ENDPOINT}
+      config={{ commitment: RPC_COMMITMENT }}
+    >
       <WalletProvider wallets={wallets} autoConnect>
-        <WalletModalProvider>{children}</WalletModalProvider>
+        <WalletModalProvider>
+          {/*
+            HouseholdContextProvider reads the active wallet (via useWallet) to
+            resolve the household PDA, so it MUST sit inside WalletProvider.
+            RefreshProvider carries the post-write refetch signal between the
+            instruction panels (bump) and the StateView (nonce); it has no
+            wallet dependency but is grouped here for a single wiring surface.
+          */}
+          <HouseholdContextProvider>
+            <RefreshProvider>{children}</RefreshProvider>
+          </HouseholdContextProvider>
+        </WalletModalProvider>
       </WalletProvider>
     </ConnectionProvider>
   );
