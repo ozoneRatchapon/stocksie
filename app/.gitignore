@@ -1,0 +1,26 @@
+# dependencies
+node_modules
+
+# next.js
+.next/
+out/
+
+# generated from ../target by scripts/copy-idl.mjs
+idl/stocksie.json
+src/lib/generated/
+
+# env
+.env*.local
+
+# logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# os / editor
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*.tsbuildinfo

@@ -1,0 +1,22 @@
+# pnpm 11+ build-script allowlist. The Stocksie UI needs none of these native
+# optional addons:
+#   - ws (bufferutil / utf-8-validate) falls back to a pure-JS implementation
+#   - sharp is only for next/image optimization, which the UI does not use
+#   - tiny-secp256k1 / blake-hash / usb back specific wallet adapters
+#     (Ledger, Keystone, Solflare SECP) we do not exercise
+#   - protobufjs / unrs-resolver / @stellar postinstalls are transitive and
+#     unused at runtime
+#
+# Declining all of them keeps `pnpm install` reproducible without a native
+# toolchain. If a future change needs one (e.g. next/image, a Ledger wallet),
+# flip the relevant entry to `true`.
+allowBuilds:
+  "@stellar/stellar-sdk": false
+  blake-hash: false
+  bufferutil: false
+  protobufjs: false
+  sharp: false
+  tiny-secp256k1: false
+  unrs-resolver: false
+  usb: false
+  utf-8-validate: false
