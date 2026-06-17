@@ -44,8 +44,8 @@ const MAX_REIMBURSE_SOL = "0.5";
 export function ReimbursePanel() {
   return (
     <Panel
-      title="Reimburse"
-      description="Pay out a restocked purchase request to the buyer. Owner/Parent only. The buyer must match the request's recorded buyer wallet; the amount may be at most the request's spend ceiling (and never more than the 0.5 SOL circuit breaker)."
+      title="Pay back"
+      description="Pay a buyer back for something they bought on behalf of the household. Admin or approver only. The buyer must match the request's recorded buyer, and the amount can't exceed the request's spending limit (or the 0.5 SOL safety limit)."
     >
       <ConnectGate>
         <ReimburseForm />
@@ -92,7 +92,7 @@ function ReimburseForm() {
     if (lamports === null) return "Enter a valid SOL amount (e.g. 0.05)";
     if (lamports <= 0n) return "Amount must be greater than zero";
     if (lamports > BigInt(MAX_REIMBURSEMENT_LAMPORTS)) {
-      return `Exceeds 0.5 SOL circuit breaker (${MAX_REIMBURSEMENT_LAMPORTS.toString()} lamports)`;
+      return `Exceeds the 0.5 SOL safety limit`;
     }
     return null;
   }, [amountInput, lamports]);
@@ -155,13 +155,13 @@ function ReimburseForm() {
   if (!isOwnerConnected) {
     return (
       <SubPanel
-        label="reimburse_buyer"
-        hint="Owner/Parent. Connect the household owner wallet (or set the owner field above to your wallet) to reimburse buyers."
+        label="Pay back the buyer"
+        hint="Admin or approver. Sign in as the household admin (or set the admin address above to your account) to pay buyers back."
       >
         <p className="rounded-lg border border-dashed border-slate-700 bg-slate-950/30 px-4 py-3 text-xs text-slate-400">
-          The connected wallet is not the resolved household owner.
-          Reimbursements are restricted to the owner in this reference UI; the
-          on-chain gate admits Owner and Parent roles.
+          You're not signed in as this household's admin. Pay-backs are
+          admin-only in this reference UI; the on-chain gate also admits the
+          Parent role.
         </p>
       </SubPanel>
     );
@@ -169,12 +169,12 @@ function ReimburseForm() {
 
   return (
     <SubPanel
-      label="reimburse_buyer"
-      hint="Owner/Parent. Pays out a restocked request to its recorded buyer. The request must be in the Restocked state; the amount is bounded by the request's spend ceiling and the 0.5 SOL circuit breaker. The buyer earns REWARD_FULL_RUN_COMPLETED on success."
+      label="Pay back the buyer"
+      hint="Admin or approver. Pays a buyer back for a bought request. The request must be marked as bought; the amount is bounded by the request's spending limit and the 0.5 SOL safety limit. The buyer earns 15 reward points on success."
     >
       <div className="grid gap-3 sm:grid-cols-[1fr_2fr_2fr_auto]">
         <Field
-          label="Request ID"
+          label="Request #"
           value={requestIdInput}
           onChange={setRequestIdInput}
           placeholder="e.g. 1"
@@ -184,14 +184,14 @@ function ReimburseForm() {
           helpText="The id assigned at creation (visible in the live state view)."
         />
         <Field
-          label="Buyer wallet"
+          label="Buyer's address"
           value={buyerInput}
           onChange={setBuyerInput}
-          placeholder="Base58 address"
+          placeholder="Their wallet address"
           mono
           error={buyerError}
           onSubmit={handleSubmit}
-          helpText="Must match the request's recorded buyer exactly."
+          helpText="Must match the buyer recorded on the request exactly."
         />
         <Field
           label="Amount"
@@ -206,7 +206,7 @@ function ReimburseForm() {
           mono
           error={amountError}
           onSubmit={handleSubmit}
-          helpText="Actual spend — may be less than the request's ceiling, never more."
+          helpText="What they actually spent — may be less than the request's spending limit, never more."
         />
         <div className="flex items-end">
           <Button
@@ -214,7 +214,7 @@ function ReimburseForm() {
             loading={tx.pending}
             disabled={!canSubmit}
           >
-            Reimburse Buyer
+            Pay back buyer
           </Button>
         </div>
       </div>

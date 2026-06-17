@@ -100,13 +100,16 @@ export function ResultBanner({
 
       <div className="min-w-0 flex-1">
         {isPending && (
-          <p className="font-medium">Signing and sending transaction…</p>
+          <p className="font-medium">Sending…</p>
         )}
 
         {isSuccess && signature && (
           <div className="flex flex-col gap-1">
-            <p className="font-medium">Transaction confirmed</p>
+            <p className="font-medium">Done</p>
             <div className="flex items-center gap-2">
+              <span className="text-[10px] uppercase tracking-wide text-emerald-400/70">
+                Receipt ID
+              </span>
               <code className="truncate font-mono text-xs text-emerald-300/90">
                 {signature}
               </code>
@@ -118,14 +121,14 @@ export function ResultBanner({
                 rel="noreferrer noopener"
                 className="font-medium text-emerald-300 underline-offset-2 hover:underline"
               >
-                View on Explorer ↗
+                View receipt ↗
               </a>
               <button
                 type="button"
                 onClick={handleCopy}
                 className="font-medium text-emerald-300/80 underline-offset-2 hover:text-emerald-200 hover:underline"
               >
-                {copied ? 'Copied' : 'Copy signature'}
+                {copied ? 'Copied' : 'Copy receipt ID'}
               </button>
             </div>
           </div>
@@ -133,7 +136,7 @@ export function ResultBanner({
 
         {isError && (
           <div className="flex flex-col gap-0.5">
-            <p className="font-medium">Transaction failed</p>
+            <p className="font-medium">Couldn't complete</p>
             <p className="break-words text-xs text-rose-200/90">{error}</p>
           </div>
         )}

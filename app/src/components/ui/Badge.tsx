@@ -49,7 +49,14 @@ export function StatusBadge({ status, className }: { status: Status; className?:
   );
 }
 
-/** Render a household member `Role` as a labeled, color-coded pill. */
+/**
+ * Render a household member `Role` as a labeled, color-coded pill.
+ *
+ * Note: `ROLE_LABELS.owner` is "Owner" here for clarity inside this badge
+ * surface (the role enum is the on-chain source of truth). The rest of the
+ * UI surfaces the owner concept as "admin" in user-facing copy — see
+ * `.plans/005_web2_ux.md` §3 (vocabulary table).
+ */
 export function RoleBadge({ role, className }: { role: Role; className?: string }) {
   return <Badge className={cn(ROLE_CLASSES[role], className)}>{ROLE_LABELS[role]}</Badge>;
 }

@@ -42,8 +42,8 @@ export function StateView() {
 
   return (
     <Panel
-      title="Live State"
-      description="On-chain mirror of the resolved household: vault balance, member roster, and purchase ledger. Polls every 1.5s and refetches immediately after every confirmed transaction."
+      title="Your household"
+      description="A live view of your shared budget, who's in the household, and every shopping request. Updates automatically after every action you take."
       actions={
         <Button
           variant="secondary"
@@ -66,8 +66,8 @@ export function StateView() {
 
       {!household ? (
         <EmptyState
-          title="No household resolved"
-          body="Enter a household owner address above to derive the household PDA and load its state. The field defaults to your connected wallet."
+          title="No household loaded yet"
+          body="Enter the household admin's address above to load your household. It defaults to your own address when you're signed in."
         />
       ) : state.loading ? (
         <LoadingState />
@@ -75,8 +75,8 @@ export function StateView() {
         <ErrorState message={state.error} onRetry={state.refetch} />
       ) : !state.data || !state.data.household ? (
         <EmptyState
-          title="Household not initialized"
-          body="This household PDA has no on-chain account yet. Run initialize_household (in the Household panel) to create it — the vault, member roster, and purchase ledger will populate here."
+          title="This household hasn't been set up yet"
+          body="Once the admin sets up the household (in the Household section below), the shared budget, members, and shopping requests will all show up here."
         />
       ) : (
         <HouseholdSections data={state.data} refreshing={state.refreshing} />
@@ -105,18 +105,18 @@ function OwnerField({
   return (
     <div className="flex flex-col gap-2 sm:flex-row sm:items-end">
       <Field
-        label="Household owner address"
+        label="Household admin address"
         value={value}
         onChange={onChange}
-        placeholder="Base58 owner pubkey (defaults to connected wallet)"
+        placeholder="The admin's wallet address (defaults to your account)"
         mono
         error={error}
-        helpText="The household PDA is derived from its owner. Override this to view a household you are a member of but did not create."
+        helpText="Your household is tied to its admin's address. Change this if you joined a household someone else set up."
         className="sm:flex-1"
       />
       {overridden && (
         <Button variant="ghost" size="sm" onClick={onReset} className="sm:mb-1.5">
-          Reset to connected wallet
+          Use my address
         </Button>
       )}
     </div>
@@ -171,16 +171,16 @@ function VaultSummary({
   return (
     <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
       <StatCard
-        label="Vault balance"
+        label="Shared budget"
         value={`${vaultSol} SOL`}
         accent
-        sub={refreshing ? 'refreshing…' : undefined}
+        sub={refreshing ? 'updating…' : undefined}
       />
       <StatCard label="Members" value={String(household.memberCount)} sub={`of 16 max`} />
-      <StatCard label="Requests created" value={requestCounter} sub="total, all time" />
-      <StatCard label="Rewards distributed" value={totalRewards} sub="points, cumulative" />
+      <StatCard label="Shopping requests" value={requestCounter} sub="total, all time" />
+      <StatCard label="Reward points given out" value={totalRewards} sub="across everyone" />
       <div className="sm:col-span-2 lg:col-span-4">
-        <MetaRow label="Household PDA" value={address.toBase58()} mono />
+        <MetaRow label="Household address" value={address.toBase58()} mono />
       </div>
     </div>
   );
@@ -235,14 +235,14 @@ function MemberRoster({ members }: { members: MemberAccount[] }) {
     <div className="flex flex-col gap-2">
       <div className="flex items-center justify-between">
         <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-300">
-          Member roster
+          Members
         </h3>
         <span className="text-xs text-slate-500">{members.length} active</span>
       </div>
       {members.length === 0 ? (
         <EmptyState
-          title="No members found"
-          body="No Member PDAs reference this household. If you just initialized, the owner membership should appear momentarily."
+          title="No members yet"
+          body="Once someone is invited, they'll show up here. The admin who set up the household appears automatically."
           compact
         />
       ) : (
@@ -250,7 +250,7 @@ function MemberRoster({ members }: { members: MemberAccount[] }) {
           <table className="w-full text-sm">
             <thead className="bg-slate-900/60 text-xs uppercase tracking-wide text-slate-500">
               <tr>
-                <th className="px-3 py-2 text-left font-medium">Wallet</th>
+                <th className="px-3 py-2 text-left font-medium">Member</th>
                 <th className="px-3 py-2 text-left font-medium">Role</th>
                 <th className="px-3 py-2 text-right font-medium">Reward points</th>
                 <th className="px-3 py-2 text-left font-medium">Status</th>
@@ -302,14 +302,14 @@ function PurchaseLedger({ requests }: { requests: PurchaseRequestAccount[] }) {
     <div className="flex flex-col gap-2">
       <div className="flex items-center justify-between">
         <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-300">
-          Purchase ledger
+          Shopping requests
         </h3>
         <span className="text-xs text-slate-500">{requests.length} request(s)</span>
       </div>
       {requests.length === 0 ? (
         <EmptyState
-          title="No purchase requests"
-          body="Create one in the Purchase Requests panel. New requests appear here as soon as they confirm."
+          title="No shopping requests yet"
+          body="When someone reports something the household needs, it'll appear here. Open one in the Shopping section below."
           compact
         />
       ) : (
@@ -317,11 +317,11 @@ function PurchaseLedger({ requests }: { requests: PurchaseRequestAccount[] }) {
           <table className="w-full text-sm">
             <thead className="bg-slate-900/60 text-xs uppercase tracking-wide text-slate-500">
               <tr>
-                <th className="px-3 py-2 text-left font-medium">ID</th>
+                <th className="px-3 py-2 text-left font-medium">#</th>
                 <th className="px-3 py-2 text-left font-medium">Status</th>
                 <th className="px-3 py-2 text-left font-medium">Buyer</th>
-                <th className="px-3 py-2 text-right font-medium">Ceiling</th>
-                <th className="px-3 py-2 text-right font-medium">Reimbursed</th>
+                <th className="px-3 py-2 text-right font-medium">Spending limit</th>
+                <th className="px-3 py-2 text-right font-medium">Paid back</th>
                 <th className="px-3 py-2 text-right font-medium">Reward</th>
               </tr>
             </thead>
@@ -370,7 +370,7 @@ function LoadingState() {
   return (
     <div className="flex items-center gap-3 rounded-lg border border-slate-800 bg-slate-950/30 px-5 py-8 text-sm text-slate-400">
       <Spinner />
-      Loading household state…
+      Loading your household…
     </div>
   );
 }
@@ -378,7 +378,7 @@ function LoadingState() {
 function ErrorState({ message, onRetry }: { message: string; onRetry: () => void }) {
   return (
     <div className="flex flex-col gap-2 rounded-lg border border-rose-500/40 bg-rose-500/10 px-5 py-4">
-      <p className="text-sm font-medium text-rose-200">Failed to load household state</p>
+      <p className="text-sm font-medium text-rose-200">Couldn't load your household</p>
       <p className="break-words text-xs text-rose-200/80">{message}</p>
       <div>
         <Button variant="secondary" size="sm" onClick={onRetry}>

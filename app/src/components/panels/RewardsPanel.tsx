@@ -40,7 +40,7 @@ export function RewardsPanel() {
   return (
     <Panel
       title="Rewards"
-      description="Manually grant points to a member (Owner/Parent) or emit a read-only score summary (any member). Rewards are an audit-stream feature — the raw reason text is blake3-hashed client-side and never lands on-chain."
+      description="Give reward points to a member (admin or approver) or check your own reward score (any member). The reason you type is kept private — only a scrambled fingerprint is recorded."
     >
       <ConnectGate>
         <AwardRewardForm />
@@ -92,13 +92,13 @@ function AwardRewardForm() {
   if (!isOwnerConnected) {
     return (
       <SubPanel
-        label="award_reward"
-        hint="Owner/Parent. Connect the household owner wallet (or set the owner field above to your wallet) to grant rewards."
+        label="Give reward points"
+        hint="Admin or approver. Sign in as the household admin (or set the admin address above to your account) to give reward points."
       >
         <p className="rounded-lg border border-dashed border-slate-700 bg-slate-950/30 px-4 py-3 text-xs text-slate-400">
-          The connected wallet is not the resolved household owner. Manual
-          rewards are restricted to the owner in this reference UI; the on-chain
-          gate admits Owner and Parent roles.
+          You're not signed in as this household's admin. Giving reward points
+          is admin-only in this reference UI; the on-chain gate also admits the
+          Parent role.
         </p>
       </SubPanel>
     );
@@ -150,19 +150,19 @@ function AwardRewardForm() {
 
   return (
     <SubPanel
-      label="award_reward"
-      hint="Owner/Parent. Grant points to any active member for any reason. The member's reward_points and the household's total_rewards_distributed both increment. Reason text is blake3-hashed before submission."
+      label="Give reward points"
+      hint="Admin or approver. Give points to any member for any reason. Their reward total and the household's overall points given out both go up. The reason is kept private — only a scrambled fingerprint is recorded."
     >
       <div className="grid gap-3 sm:grid-cols-2">
         <Field
-          label="Member wallet"
+          label="Member's address"
           value={memberInput}
           onChange={setMemberInput}
-          placeholder="Base58 address"
+          placeholder="Their wallet address"
           mono
           error={memberError}
           onSubmit={handleSubmit}
-          helpText="The member being rewarded — can be any active member of this household."
+          helpText="The member you're rewarding — can be any active member of this household."
         />
         <Field
           label="Points"
@@ -178,11 +178,11 @@ function AwardRewardForm() {
           helpText="Whole number of points to grant. Must be greater than zero."
         />
         <Field
-          label="Reason (hashed)"
+          label="Reason"
           value={reasonInput}
           onChange={setReasonInput}
           placeholder='e.g. "Found a coupon for the diapers"'
-          helpText="Blake3-hashed client-side; only the 32-byte digest is stored on-chain."
+          helpText="🔒 Private — only a scrambled fingerprint of the reason is recorded, never the reason itself."
           onSubmit={handleSubmit}
           className="sm:col-span-2"
         />
@@ -193,7 +193,7 @@ function AwardRewardForm() {
           loading={tx.pending}
           disabled={!canSubmit}
         >
-          Award Reward
+          Give points
         </Button>
       </div>
       <ResultBanner
@@ -242,8 +242,8 @@ function RewardSummaryForm() {
 
   return (
     <SubPanel
-      label="reward_summary"
-      hint="Any active member. Emits a read-only RewardEarned event carrying your current cumulative score (points=0, all-zero hash sentinel distinguishes it from a real grant). Useful when consuming the event stream instead of deserializing Member accounts."
+      label="Show my reward score"
+      hint="Any member. Publishes your current reward total so other apps watching the household can pick it up. Doesn't change any balances — the score is also visible in the household view above."
     >
       <div className="flex items-center gap-3">
         <Button
@@ -252,11 +252,11 @@ function RewardSummaryForm() {
           disabled={!canSubmit}
           variant="secondary"
         >
-          Emit Summary
+          Show my score
         </Button>
         <span className="text-xs text-slate-500">
-          No state change — the StateView below reads scores directly from your
-          Member account.
+          Doesn't change any balances — your score is also shown in the
+          household view above.
         </span>
       </div>
       <ResultBanner

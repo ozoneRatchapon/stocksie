@@ -39,12 +39,11 @@ export function ConnectGate({ requireHousehold = true, children }: ConnectGatePr
     return (
       <GateShell>
         <p className="text-sm text-slate-300">
-          Connect a wallet to drive this panel.
+          Sign in to use this.
         </p>
         <p className="text-xs text-slate-500">
-          Wallet Standard extensions (Phantom / Solflare / Backpack) and the
-          built-in <strong>Local Keypair (dev)</strong> fallback are all
-          supported.
+          Sign in with Phantom, Solflare, or Backpack — or use the built-in
+          dev account to try Stocksie on the local cluster.
         </p>
         <WalletButton />
       </GateShell>
@@ -55,13 +54,11 @@ export function ConnectGate({ requireHousehold = true, children }: ConnectGatePr
     return (
       <GateShell>
         <p className="text-sm text-slate-300">
-          Enter a household owner address above to resolve the household PDA.
+          Enter the household admin's address above to load your household.
         </p>
         <p className="text-xs text-slate-500">
-          The household is derived from its owner
-          (<code className="font-mono text-slate-400">["household", owner]</code>).
-          Defaults to your connected wallet; override it to transact against a
-          household you are a member of but did not create.
+          Your household is tied to its admin's address. It defaults to your
+          own account; change it if you joined a household someone else set up.
         </p>
       </GateShell>
     );

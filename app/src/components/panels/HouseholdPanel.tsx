@@ -44,14 +44,14 @@ const ROLE_OPTIONS: SelectOption[] = [
   { value: "parent", label: "Parent" },
   { value: "child", label: "Child" },
   { value: "guest", label: "Guest" },
-  { value: "owner", label: "Owner (not allowed)", disabled: true },
+  { value: "owner", label: "Admin (already taken)", disabled: true },
 ];
 
 export function HouseholdPanel() {
   return (
     <Panel
       title="Household"
-      description="Create a household (you become the owner) and manage its membership. Adding, removing, and role changes are owner-only — connect the household owner wallet to use them."
+      description="Set up your household (you become its admin) and manage who's in it. Inviting, removing, and role changes are admin-only."
     >
       <ConnectGate requireHousehold={false}>
         <InitializeForm />
@@ -106,15 +106,15 @@ function InitializeForm() {
 
   return (
     <SubPanel
-      label="initialize_household"
-      hint="Create a new household + vault + your owner membership in one transaction. You become the household owner; the name is blake3-hashed before submission."
+      label="Set up your household"
+      hint="Create your household in one step. You become its admin. The household name is kept private — only a scrambled fingerprint of the name is recorded."
     >
       <Field
         label="Household name"
         value={name}
         onChange={setName}
         placeholder="e.g. The Smiths"
-        helpText="Blake3-hashed client-side; only the 32-byte digest is stored on-chain."
+        helpText="🔒 Private — only a scrambled fingerprint of the name is recorded, never the name itself."
         onSubmit={handleSubmit}
       />
       <div className="flex items-center gap-3">
@@ -123,7 +123,7 @@ function InitializeForm() {
           loading={tx.pending}
           disabled={!canSubmit}
         >
-          Initialize Household
+          Set up household
         </Button>
       </div>
       <ResultBanner
@@ -149,12 +149,12 @@ function ManageMembersSection() {
   if (!isOwnerConnected) {
     return (
       <SubPanel
-        label="Membership management"
-        hint="Owner-only. Connect the household owner wallet (or set the owner field above to your wallet) to add/remove members and change roles."
+        label="Manage members"
+        hint="Admin only. Sign in as the household admin (or set the admin address above to your account) to invite, remove, or change roles."
       >
         <p className="rounded-lg border border-dashed border-slate-700 bg-slate-950/30 px-4 py-3 text-xs text-slate-400">
-          The connected wallet is not the resolved household owner. Membership
-          management is restricted to the owner.
+          You're not signed in as this household's admin. Only the admin can
+          invite, remove, or change roles.
         </p>
       </SubPanel>
     );
@@ -231,18 +231,18 @@ function AddMemberForm() {
 
   return (
     <SubPanel
-      label="add_member"
-      hint="Owner-only. Onboard a wallet under a role. The role is permanent until changed with set_role; the owner role is never assignable here."
+      label="Invite a member"
+      hint="Admin only. Add someone to the household under a role. The role lasts until you change it; the admin role is set when the household is created and can't be reassigned here."
     >
       <Field
-        label="New member wallet"
+        label="New member's address"
         value={walletInput}
         onChange={setWalletInput}
-        placeholder="Base58 address"
+        placeholder="Their wallet address"
         mono
         error={walletError}
         onSubmit={handleSubmit}
-        helpText="The wallet being added — they need not be connected or be a signer."
+        helpText="The wallet address of the person you're inviting. They don't need to be signed in for you to add them."
       />
       <Select
         label="Role"
@@ -259,7 +259,7 @@ function AddMemberForm() {
           loading={tx.pending}
           disabled={!canSubmit}
         >
-          Add Member
+          Invite member
         </Button>
       </div>
       <ResultBanner
@@ -325,14 +325,14 @@ function RemoveMemberForm() {
 
   return (
     <SubPanel
-      label="remove_member"
-      hint="Owner-only. Closes the membership PDA and refunds rent to the owner. The household owner cannot be removed. Re-adding a removed wallet works via add_member."
+      label="Remove a member"
+      hint="Admin only. Removes someone from the household. The household admin can't be removed. You can re-invite a removed member later if needed."
     >
       <Field
-        label="Member wallet to remove"
+        label="Member's address"
         value={walletInput}
         onChange={setWalletInput}
-        placeholder="Base58 address"
+        placeholder="Their wallet address"
         mono
         error={walletError}
         onSubmit={handleSubmit}
@@ -344,7 +344,7 @@ function RemoveMemberForm() {
           disabled={!canSubmit}
           variant="danger"
         >
-          Remove Member
+          Remove member
         </Button>
       </div>
       <ResultBanner
@@ -416,14 +416,14 @@ function SetRoleForm() {
 
   return (
     <SubPanel
-      label="set_role"
-      hint="Owner-only. Change a member's role. Promotion to owner is rejected — the only owner is the household creator."
+      label="Change a member's role"
+      hint="Admin only. Change someone's role in the household. You can't make someone else the admin — the admin is always the household's original creator."
     >
       <Field
-        label="Member wallet"
+        label="Member's address"
         value={walletInput}
         onChange={setWalletInput}
-        placeholder="Base58 address"
+        placeholder="Their wallet address"
         mono
         error={walletError}
         onSubmit={handleSubmit}
@@ -443,7 +443,7 @@ function SetRoleForm() {
           loading={tx.pending}
           disabled={!canSubmit}
         >
-          Update Role
+          Update role
         </Button>
       </div>
       <ResultBanner

@@ -39,8 +39,8 @@ const MIN_DEPOSIT_SOL = "0.0001"; // 100_000 lamports — matches MIN_REQUEST_LA
 export function FundsPanel() {
   return (
     <Panel
-      title="Funds"
-      description="Top up the shared household vault, or — for the household owner — perform an emergency drain. Routine spending flows through the purchase approval + reimbursement pipeline, not through withdraw."
+      title="Money"
+      description="Add money to the shared household budget, or — if you're the admin — move money back to your own account. Day-to-day shopping goes through the request + pay-back flow, not through withdrawals."
     >
       <ConnectGate>
         <DepositForm />
@@ -111,8 +111,8 @@ function DepositForm() {
 
   return (
     <SubPanel
-      label="deposit_funds"
-      hint="Any active member may top up the vault. The deposit is attributed to your membership in the on-chain FundsDeposited event."
+      label="Add money to the budget"
+      hint="Any member can top up the shared budget. Your contribution is recorded against your account."
     >
       <Field
         label="Amount"
@@ -126,7 +126,7 @@ function DepositForm() {
         mono
         error={amountError}
         onSubmit={handleSubmit}
-        helpText="Parsed as lamports (1 SOL = 1,000,000,000 lamports) using float-free bigint math."
+        helpText="The amount to add to the shared budget, in SOL."
       />
       <div className="flex items-center gap-3">
         <Button
@@ -134,7 +134,7 @@ function DepositForm() {
           loading={tx.pending}
           disabled={!canSubmit}
         >
-          Deposit
+          Add money
         </Button>
       </div>
       <ResultBanner
@@ -209,12 +209,12 @@ function WithdrawForm() {
   if (!isOwnerConnected) {
     return (
       <SubPanel
-        label="withdraw_funds"
-        hint="Emergency drain — owner only. Connect the household owner wallet (or set the owner field above to your wallet) to enable withdrawals."
+        label="Move money back to my account"
+        hint="Admin only. Sign in as the household admin (or set the admin address above to your account) to withdraw."
       >
         <p className="rounded-lg border border-dashed border-slate-700 bg-slate-950/30 px-4 py-3 text-xs text-slate-400">
-          The connected wallet is not the resolved household owner. Withdrawals
-          are restricted to the owner and always drain back to that same wallet.
+          You're not signed in as this household's admin. Withdrawals are
+          admin-only and always go back to the admin's account.
         </p>
       </SubPanel>
     );
@@ -222,8 +222,8 @@ function WithdrawForm() {
 
   return (
     <SubPanel
-      label="withdraw_funds"
-      hint="Owner-only emergency drain. Funds always return to the household owner wallet — routine spending must go through reimburse_buyer against an approved purchase request."
+      label="Move money back to my account"
+      hint="Admin only. Money always goes back to the admin's account. For everyday spending, use the request + pay-back flow instead."
     >
       <Field
         label="Amount"
@@ -237,7 +237,7 @@ function WithdrawForm() {
         mono
         error={amountError}
         onSubmit={handleSubmit}
-        helpText="The vault must hold at least this many lamports; the program debits via a direct PDA → owner lamport move."
+        helpText="The shared budget must hold at least this much. The amount is moved directly back to your account."
       />
       <div className="flex items-center gap-3">
         <Button
@@ -246,7 +246,7 @@ function WithdrawForm() {
           disabled={!canSubmit}
           variant="danger"
         >
-          Withdraw
+          Move money back
         </Button>
       </div>
       <ResultBanner

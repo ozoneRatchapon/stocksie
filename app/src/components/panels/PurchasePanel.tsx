@@ -48,8 +48,8 @@ import { ConnectGate } from "@/components/ui/ConnectGate";
 export function PurchasePanel() {
   return (
     <Panel
-      title="Purchase Requests"
-      description="Open a purchase request as a low-stock reporter, then approve, reject, confirm restock, or close it. The full lifecycle (pending → approved → restocked → reimbursed, or rejected) runs through these five instructions."
+      title="Shopping"
+      description="Report something the household needs, then approve it, decline it, mark it as bought, pay the buyer back, or close it. The full lifecycle (waiting → approved → bought → paid back, or declined) runs through these five actions."
     >
       <ConnectGate>
         <CreateForm />
@@ -161,12 +161,12 @@ function CreateForm() {
 
   return (
     <SubPanel
-      label="create_purchase_request"
-      hint="Open a request as the low-stock reporter. You earn REWARD_LOW_STOCK_REPORT (10 pts). The buyer must be an active member of this household. Item / unit-cost text is blake3-hashed before submission."
+      label="Report something we need"
+      hint="Open a request when you notice something's running low. You earn 10 reward points for reporting. The buyer must already be a member of this household. The item and price details are kept private."
     >
       <div className="grid gap-3 sm:grid-cols-2">
         <Field
-          label="Amount (spend ceiling)"
+          label="Spending limit"
           value={amountInput}
           onChange={setAmountInput}
           type="number"
@@ -180,29 +180,29 @@ function CreateForm() {
           onSubmit={handleSubmit}
         />
         <Field
-          label="Buyer wallet"
+          label="Buyer's address"
           value={buyerInput}
           onChange={setBuyerInput}
-          placeholder="Base58 address"
+          placeholder="Their wallet address"
           mono
           error={buyerError}
           onSubmit={handleSubmit}
-          helpText="The member who will make the purchase and confirm restock."
+          helpText="The member who will buy the item and mark it as bought."
         />
         <Field
-          label="Item / quantity (hashed)"
+          label="Item / quantity"
           value={itemInput}
           onChange={setItemInput}
           placeholder='e.g. "Pampers Size 3, 2 boxes"'
-          helpText="Blake3-hashed; raw text stays off-chain."
+          helpText="🔒 Private — only a scrambled fingerprint is recorded."
           onSubmit={handleSubmit}
         />
         <Field
-          label="Best-value snapshot (hashed)"
+          label="Best-value snapshot"
           value={unitCostInput}
           onChange={setUnitCostInput}
           placeholder='e.g. "Lowest unit price at store X"'
-          helpText="Blake3-hashed; the off-chain engine scores cost-savings against this snapshot."
+          helpText="🔒 Private — used later to score cost-savings."
           onSubmit={handleSubmit}
         />
       </div>
@@ -212,7 +212,7 @@ function CreateForm() {
           loading={tx.pending}
           disabled={!canSubmit}
         >
-          Create Request
+          Open request
         </Button>
       </div>
       <ResultBanner
@@ -314,13 +314,13 @@ function ApproveForm() {
   if (!isOwnerConnected) {
     return (
       <SubPanel
-        label="approve_purchase_request"
-        hint="Owner/Parent. Connect the household owner wallet (or set the owner field above to your wallet) to approve requests."
+        label="Approve the request"
+        hint="Admin or approver. Sign in as the household admin (or set the admin address above to your account) to approve requests."
       >
         <p className="rounded-lg border border-dashed border-slate-700 bg-slate-950/30 px-4 py-3 text-xs text-slate-400">
-          The connected wallet is not the resolved household owner.
-          Approvals are restricted to the owner in this reference UI; the
-          on-chain gate admits Owner and Parent roles.
+          You're not signed in as this household's admin. Approvals are
+          admin-only in this reference UI; the on-chain gate also admits the
+          Parent role.
         </p>
       </SubPanel>
     );
@@ -328,12 +328,12 @@ function ApproveForm() {
 
   return (
     <SubPanel
-      label="approve_purchase_request"
-      hint="Owner/Parent. Marks a pending request as approved and records the approver wallet on the request."
+      label="Approve the request"
+      hint="Admin or approver. Marks a waiting request as approved and records who approved it."
     >
       <div className="grid gap-3 sm:grid-cols-[1fr_auto]">
         <Field
-          label="Request ID"
+          label="Request #"
           value={requestIdInput}
           onChange={setRequestIdInput}
           placeholder="e.g. 1"
@@ -408,13 +408,13 @@ function RejectForm() {
   if (!isOwnerConnected) {
     return (
       <SubPanel
-        label="reject_purchase_request"
-        hint="Owner/Parent. Connect the household owner wallet (or set the owner field above to your wallet) to reject requests."
+        label="Decline the request"
+        hint="Admin or approver. Sign in as the household admin (or set the admin address above to your account) to decline requests."
       >
         <p className="rounded-lg border border-dashed border-slate-700 bg-slate-950/30 px-4 py-3 text-xs text-slate-400">
-          The connected wallet is not the resolved household owner.
-          Rejections are restricted to the owner in this reference UI; the
-          on-chain gate admits Owner and Parent roles.
+          You're not signed in as this household's admin. Declines are
+          admin-only in this reference UI; the on-chain gate also admits the
+          Parent role.
         </p>
       </SubPanel>
     );
@@ -422,12 +422,12 @@ function RejectForm() {
 
   return (
     <SubPanel
-      label="reject_purchase_request"
-      hint="Owner/Parent. Moves a pending request to rejected. The reason is blake3-hashed client-side — the raw text never lands on-chain."
+      label="Decline the request"
+      hint="Admin or approver. Moves a waiting request to declined. The reason is kept private — only a scrambled fingerprint is recorded."
     >
       <div className="grid gap-3 sm:grid-cols-[1fr_2fr_auto]">
         <Field
-          label="Request ID"
+          label="Request #"
           value={requestIdInput}
           onChange={setRequestIdInput}
           placeholder="e.g. 1"
@@ -436,11 +436,11 @@ function RejectForm() {
           onSubmit={handleSubmit}
         />
         <Field
-          label="Reason (hashed)"
+          label="Reason"
           value={reasonInput}
           onChange={setReasonInput}
           placeholder='e.g. "Already have enough at home"'
-          helpText="Blake3-hashed; stored only as a 32-byte digest."
+          helpText="🔒 Private — only a scrambled fingerprint is recorded."
           onSubmit={handleSubmit}
         />
         <div className="flex items-end">
@@ -450,7 +450,7 @@ function RejectForm() {
             disabled={!canSubmit}
             variant="danger"
           >
-            Reject
+            Decline
           </Button>
         </div>
       </div>
@@ -519,12 +519,12 @@ function ConfirmRestockForm() {
 
   return (
     <SubPanel
-      label="confirm_restock"
-      hint="The buyer confirms they restocked the item. Earns REWARD_RESTOCK_COMPLETED (25 pts). The unit-cost snapshot may differ from the create-time one — record what the buyer actually picked."
+      label="Mark as bought"
+      hint="The buyer confirms they've bought the item. Earns 25 reward points. The price snapshot may differ from the original one — record what the buyer actually picked up."
     >
       <div className="grid gap-3 sm:grid-cols-[1fr_2fr_2fr_auto]">
         <Field
-          label="Request ID"
+          label="Request #"
           value={requestIdInput}
           onChange={setRequestIdInput}
           placeholder="e.g. 1"
@@ -533,21 +533,21 @@ function ConfirmRestockForm() {
           onSubmit={handleSubmit}
         />
         <Field
-          label="Buyer wallet"
+          label="Buyer's address"
           value={buyerInput}
           onChange={setBuyerInput}
-          placeholder="Base58 address"
+          placeholder="Their wallet address"
           mono
           error={buyerError}
           onSubmit={handleSubmit}
-          helpText="The buyer signs; restock is buyer-only."
+          helpText="Only the buyer can mark a request as bought."
         />
         <Field
-          label="Actual unit cost (hashed)"
+          label="Actual unit cost"
           value={unitCostInput}
           onChange={setUnitCostInput}
           placeholder='e.g. "Cheapest pack at store Y"'
-          helpText="Blake3-hashed."
+          helpText="🔒 Private — only a scrambled fingerprint is recorded."
           onSubmit={handleSubmit}
         />
         <div className="flex items-end">
@@ -556,7 +556,7 @@ function ConfirmRestockForm() {
             loading={tx.pending}
             disabled={!canSubmit}
           >
-            Confirm Restock
+            Mark as bought
           </Button>
         </div>
       </div>
@@ -616,13 +616,13 @@ function CloseForm() {
   if (!isOwnerConnected) {
     return (
       <SubPanel
-        label="close_purchase_request"
-        hint="Owner/Parent. Connect the household owner wallet (or set the owner field above to your wallet) to close requests."
+        label="Close the request"
+        hint="Admin or approver. Sign in as the household admin (or set the admin address above to your account) to close requests."
       >
         <p className="rounded-lg border border-dashed border-slate-700 bg-slate-950/30 px-4 py-3 text-xs text-slate-400">
-          The connected wallet is not the resolved household owner.
-          Closures are restricted to the owner in this reference UI; the
-          on-chain gate admits Owner and Parent roles.
+          You're not signed in as this household's admin. Closures are
+          admin-only in this reference UI; the on-chain gate also admits the
+          Parent role.
         </p>
       </SubPanel>
     );
@@ -630,12 +630,12 @@ function CloseForm() {
 
   return (
     <SubPanel
-      label="close_purchase_request"
-      hint="Owner/Parent. Closes a terminal-state request (reimbursed or rejected) and reclaims rent. Cannot close a mid-lifecycle request."
+      label="Close the request"
+      hint="Admin or approver. Closes a finished request (paid back or declined) and reclaims its deposit. Can't close a request that's still in progress."
     >
       <div className="grid gap-3 sm:grid-cols-[1fr_auto]">
         <Field
-          label="Request ID"
+          label="Request #"
           value={requestIdInput}
           onChange={setRequestIdInput}
           placeholder="e.g. 1"
@@ -650,7 +650,7 @@ function CloseForm() {
             disabled={!canSubmit}
             variant="secondary"
           >
-            Close Request
+            Close request
           </Button>
         </div>
       </div>
