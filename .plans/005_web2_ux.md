@@ -145,6 +145,52 @@ Copy + presentation only. No logic changes. No new dependencies.
 - [x] **1.14** Conventional commit on `feature/web2-ux`:
   `feat(ux): rewrite crypto jargon to household vocabulary (web2-friendly)`.
 
+## 4b. Layer 0 — Orientation (landing) (ACTIVE)
+
+Raised after the Layer 1 review: the app has no "front door." A new web2 user
+lands straight into a wall of forms (admin-address field + 5 gated panels)
+with **zero explanation** of what Stocksie is, who it's for, what problem it
+solves, or what a successful session looks like. Layers 2 and 3 both *assume*
+the user already knows what the app is — Layer 0 fixes the thing that has to
+come before both of them. **Highest-impact change for web2 adoption.**
+
+This is a structural layer (a new component + a branch in `page.tsx`), not a
+copy-only layer like Layer 1. Built on a fresh branch `feature/web2-ux-landing`
+off `feature/web2-ux`. Still no logic / account / transaction changes — the
+landing is a read-only marketing surface; the operational UI is unchanged.
+
+- [x] **0.1** New `app/src/components/Landing.tsx` — a read-only orientation
+  page with four sections, in this order:
+  - **Hero** — headline + one-line value prop + primary CTA ("Get started →").
+  - **Hook** — 3 "what Stocksie helps with" cards mapping to the real
+    instruction families (🏦 shared budget = deposit/withdraw; 🛒 track
+    purchases = purchase lifecycle; 🎁 reward habits = award_reward).
+  - **Example scenario** — a concrete worked example ("the Lee household":
+    set up → add money → report → approve → buy → pay back → earn points) so
+    an abstract product becomes tangible.
+  - **Final CTA** — repeat the "Get started →" entry point.
+- [x] **0.2** `app/src/components/Dashboard.tsx` — extract the current
+  `page.tsx` body (header + status pill + StateView + 5 panels + footer +
+  collapsed Developer details) verbatim into a `Dashboard` component. No copy
+  or layout changes here — pure move.
+- [x] **0.3** Rewrite `app/src/app/page.tsx` into a thin router:
+  `if (!connected) return <Landing />; return <Dashboard />;` using
+  `useWallet().connected`. One URL, conditional render — matches web2
+  expectations ("the app knows I'm new").
+- [x] **0.4** Fix the header sign-in inconsistency: `page.tsx` (now
+  `Dashboard.tsx`) imports `WalletMultiButton` **directly** on the header,
+  bypassing the friendly `WalletButton` wrapper — so the header still said
+  "Select Wallet" while the panel gates said "Sign in". Swap to `WalletButton`
+  for a single, consistent control across the app.
+- [x] **0.5** Landing primary CTA ("Get started →") opens the wallet modal via
+  `useWalletModal().setVisible(true)` (already inside `WalletModalProvider`).
+  After sign-in, `connected` flips → dashboard renders → the HouseholdPanel
+  "Set up your household" flow is the first thing they see.
+- [x] **0.6** Verify: `tsc --noEmit` (app) → exit 0; `pnpm -C app build` →
+  exit 0; eyeball both states (signed-out landing, signed-in dashboard).
+- [x] **0.7** Conventional commit on `feature/web2-ux-landing`:
+  `feat(ux): add a landing page (hero, hook, example) for first-time web2 users`.
+
 ## 5. Layer 2 — Visual & layout warmth (DEFERRED)
 
 Not started. Pending Layer 1 review.
@@ -225,16 +271,35 @@ Not started. Pending Layers 1 + 2 review.
 - `git diff --stat HEAD` → **11 files changed, +270/−215**, all under `app/src/app/page.tsx` + `app/src/components/` + `app/src/components/panels/` + `app/src/components/ui/`. **Zero** `lib/`, `hooks/`, `adapters/`, or `programs/` (Rust) files touched.
 - Scope-of-change audit: every hunk is a string literal (Panel title / description, SubPanel label / hint, Field label / placeholder / helpText, button label, EmptyState title/body, table header, ResultBanner copy, ConnectGate copy, JSDoc). No Anchor method calls, no `.accountsStrict({...})` account sets, no PDA derivation, no transaction thunks, no validation logic touched.
 
+### Layer 0
+- `tsc --noEmit` (app) → **exit 0**.
+- `pnpm -C app build` → **exit 0** (main route **70.6 kB / 259 kB First Load JS**,
+  up from 68.9 / 257 — the +1.7 kB page is the new `Landing.tsx` + the
+  conditional in `page.tsx`; `Dashboard.tsx` is a pure move of the old body).
+- Files: new `app/src/components/Landing.tsx` (read-only orientation: hero +
+  3 hook cards + the Lee-household example + two "Get started" CTAs that open
+  the wallet modal); new `app/src/components/Dashboard.tsx` (old `page.tsx`
+  body verbatim, header now using the friendly `WalletButton`); `page.tsx`
+  reduced to a 6-line router (`connected ? <Dashboard/> : <Landing/>`).
+- No `lib/`, `hooks/`, `adapters/`, or Rust files touched. Landing is read-only
+  (no on-chain calls); the operational UI is unchanged.
+
 ## 9. Status
 
-**Layer 1 complete and verified.** All vocabulary rewrites applied across
-`page.tsx`, `StateView.tsx`, all 5 panels, `ConnectGate.tsx`,
-`WalletButton.tsx`, `ResultBanner.tsx`, and `Badge.tsx`. Developer-only
-surfaces (Cluster / Program client / Wallet adapter) moved behind a collapsed
-`<details>` at the bottom of the page. `tsc --noEmit`, `pnpm -C app build`,
+**Layer 1 complete, committed, and reviewed.** All vocabulary rewrites +
+the wallet-button labels override (§1.10a) are on `feature/web2-ux`
+(commits `fa043e5` + `a5dc7f3`). `tsc --noEmit`, `pnpm -C app build`,
 `cargo check`, and `cargo clippy --all-targets` all exit 0. No logic changes —
 copy + presentation only.
 
-Layers 2 + 3 deferred pending Layer 1 review. Awaiting conventional commit and
-user sign-off on the direction before starting Layer 2 (visual warmth) or
-Layer 3 (guided flow).
+**Layer 0 (orientation / landing) now ACTIVE — prioritised ahead of Layers 2
+and 3.** Raised in the Layer 1 review: the app has no front door, so a new
+web2 user lands in a wall of forms with no idea what Stocksie is or why
+they'd use it. A landing page (hero → hook → example → enter) is the
+single highest-impact change for web2 adoption, and it reframes Layers 2/3
+from "make the scary thing pretty" into "make the destination the hero
+pointed to feel like home." Building on `feature/web2-ux-landing` off
+`feature/web2-ux`.
+
+Layers 2 (visual warmth) and 3 (guided flow) remain deferred until Layer 0
+is reviewed.
