@@ -124,6 +124,13 @@ Copy + presentation only. No logic changes. No new dependencies.
   change here; the `WalletMultiButton` chrome comes from the adapter UI and
   will be re-skinned in Layer 2). Update the JSDoc to reflect the "Sign in"
   vocabulary used by the rest of the app.
+- [x] **1.10a** (follow-up, same file) Override the button's *labels* via the
+  first-class `labels` prop on `BaseWalletMultiButton` — "Select Wallet" →
+  "Sign in", "Connect" → "Sign in", "Connecting …" → "Signing in…",
+  "Change wallet" → "Switch account", "Disconnect" → "Sign out". The exported
+  `WalletMultiButton` hardcodes its labels, so we render
+  `BaseWalletMultiButton` directly. The connected-state address display and
+  the colour/border chrome stay in Layer 2 (§5.7).
 - [x] **1.11** `app/src/components/ui/ResultBanner.tsx` — "Transaction
   confirmed" → "Done"; "Signing and sending transaction…" → "Sending…";
   "Transaction failed" → "Couldn't complete"; "View on Explorer ↗" → "View
@@ -158,9 +165,14 @@ Not started. Pending Layer 1 review.
   — status pill + item (truncated) + buyer avatar + spending limit + reward.
 - [ ] **2.6** Add **icons / emoji** for household concepts (🏠 household,
   💰 budget, 🛒 purchase, 🎁 reward) in Panel headers.
-- [ ] **2.7** Re-skin the `WalletMultiButton` chrome to match the friendly
-  palette (this currently pulls in
-  `@solana/wallet-adapter-react-ui/styles.css`).
+- [ ] **2.7** Visually re-skin the wallet button chrome (colours, borders,
+  rounded corners) to match the friendly palette, and replace the
+  connected-state truncated address with an avatar + name (see §2.2). The
+  button *labels* ("Sign in" / "Sign out" / "Switch account") were already
+  overridden in Layer 1 (§1.10a) via `BaseWalletMultiButton`'s `labels` prop;
+  the adapter CSS imported here
+  (`@solana/wallet-adapter-react-ui/styles.css`) only governs styling, not
+  text.
 
 ## 6. Layer 3 — Guided flow (DEFERRED)
 
