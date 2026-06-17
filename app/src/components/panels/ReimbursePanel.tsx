@@ -60,7 +60,8 @@ export function ReimbursePanel() {
 
 function ReimburseForm() {
   const program = useProgram();
-  const { household, connectedWallet, callerMember } = useHouseholdContext();
+  const { household, connectedWallet, callerMember, isOwnerConnected } =
+    useHouseholdContext();
   const tx = useTransaction();
   const [requestIdInput, setRequestIdInput] = useState("");
   const [buyerInput, setBuyerInput] = useState("");
@@ -145,6 +146,26 @@ function ReimburseForm() {
         .rpc();
     });
   };
+
+  // Owner/Parent gate: the program rejects any non-Owner/Parent caller with
+  // `UnauthorizedRole`. Surface a clear hint up-front (mirroring FundsPanel's
+  // withdraw gate) rather than letting the user discover it via a failed
+  // transaction. We use `isOwnerConnected` as a conservative proxy: the UI
+  // cannot read the connected wallet's role without an extra account fetch.
+  if (!isOwnerConnected) {
+    return (
+      <SubPanel
+        label="reimburse_buyer"
+        hint="Owner/Parent. Connect the household owner wallet (or set the owner field above to your wallet) to reimburse buyers."
+      >
+        <p className="rounded-lg border border-dashed border-slate-700 bg-slate-950/30 px-4 py-3 text-xs text-slate-400">
+          The connected wallet is not the resolved household owner.
+          Reimbursements are restricted to the owner in this reference UI; the
+          on-chain gate admits Owner and Parent roles.
+        </p>
+      </SubPanel>
+    );
+  }
 
   return (
     <SubPanel

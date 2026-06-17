@@ -55,7 +55,7 @@ export function tryParsePublicKey(input: string): PublicKey | null {
  * - Overflow of the JS `BigInt` range → `null` (defensive; in practice the
  *   values are u64 request ids / point counts, which fit comfortably).
  *
- * Returns a `bigint` (not `number`) so callers never hit the
+ * Returns a `bigint` (or `null` on empty/invalid input — not a `number`) so callers never hit the
  * `Number.MAX_SAFE_INTEGER` cliff when feeding the value into a `new BN(...)`
  * instruction arg via `.toString()`.
  */

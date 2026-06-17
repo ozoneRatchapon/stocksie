@@ -266,6 +266,14 @@ export function useHousehold(refreshNonce: number = 0): UseHouseholdResult {
     // `loading` flips true only on this path (initial / address change), not on
     // poll or post-write refetches, so the StateView doesn't flash a loader on
     // every refresh tick.
+    // Authoritative reset on address change: invalidate any in-flight fetch,
+    // clear stale data, and reset the pending flag so the new fetch can start
+    // even if a poll/post-write fetch is still in flight. Without this, a
+    // pending fetch for the OLD address would pass its token check and write
+    // stale data under the NEW address label.
+    fetchTokenRef.current++;
+    pendingRef.current = false;
+    setData(null);
     void runFetch(household, true);
   }, [program, connection, household, runFetch]);
 

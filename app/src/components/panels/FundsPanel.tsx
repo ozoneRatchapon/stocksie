@@ -24,10 +24,7 @@ import { useHouseholdContext } from "@/hooks/useHouseholdContext";
 import { useTransactionWithRefresh as useTransaction } from "@/hooks/useRefresh";
 import { SYSTEM_PROGRAM_ID } from "@/lib/accounts";
 import { solToLamports } from "@/lib/format";
-import {
-  MIN_REQUEST_LAMPORTS,
-  MAX_REIMBURSEMENT_LAMPORTS,
-} from "@/lib/constants";
+import { MIN_REQUEST_LAMPORTS } from "@/lib/constants";
 import { Panel, SubPanel } from "@/components/ui/Panel";
 import { Field } from "@/components/ui/Field";
 import { Button } from "@/components/ui/Button";
@@ -38,7 +35,6 @@ import { ConnectGate } from "@/components/ui/ConnectGate";
 // hard limits (`ZeroDeposit`, `AmountExceedsMaximum`, etc.); these constants
 // just keep the form from encouraging obviously-wrong inputs.
 const MIN_DEPOSIT_SOL = "0.0001"; // 100_000 lamports — matches MIN_REQUEST_LAMPORTS floor
-const MAX_WITHDRAW_SOL_DISPLAY = "0.5"; // 500_000_000 lamports — matches MAX_REIMBURSEMENT_LAMPORTS
 
 export function FundsPanel() {
   return (
@@ -168,9 +164,6 @@ function WithdrawForm() {
     if (amount.trim().length === 0) return null;
     if (parsed === null) return "Enter a valid SOL amount (e.g. 0.5)";
     if (parsed <= 0n) return "Amount must be greater than zero";
-    if (parsed > BigInt(MAX_REIMBURSEMENT_LAMPORTS)) {
-      return `Amount exceeds the display ceiling (${MAX_WITHDRAW_SOL_DISPLAY} SOL)`;
-    }
     return null;
   }, [amount, parsed]);
 
@@ -237,7 +230,7 @@ function WithdrawForm() {
         value={amount}
         onChange={setAmount}
         type="number"
-        placeholder={MAX_WITHDRAW_SOL_DISPLAY}
+        placeholder="0.1"
         suffix="SOL"
         min="0"
         step="0.0001"

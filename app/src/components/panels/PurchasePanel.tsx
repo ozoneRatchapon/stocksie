@@ -101,14 +101,6 @@ function CreateForm() {
     return buyerWallet ? null : "Invalid Solana address";
   }, [buyerInput, buyerWallet]);
 
-  const itemError =
-    itemInput.trim().length === 0 && amountInput.trim().length > 0
-      ? null
-      : null; // item/unit-cost are free text; only required at submit time
-  const unitCostError = null;
-  void itemError;
-  void unitCostError;
-
   const canSubmit =
     !!program &&
     !!household &&
@@ -146,7 +138,7 @@ function CreateForm() {
       // here (rather than trusting a cached counter) closes the race window
       // where a concurrent request could have bumped the counter.
       const householdAccount = await program.account.household.fetch(household);
-      const nextId = householdAccount.requestCounter.toNumber() + 1;
+      const nextId = BigInt(householdAccount.requestCounter.toString(10)) + 1n;
       const request = purchasePda(household, nextId);
       return program.methods
         .createPurchaseRequest(
@@ -285,7 +277,7 @@ function useRequestIdInput() {
 
 function ApproveForm() {
   const program = useProgram();
-  const { household, connectedWallet } = useHouseholdContext();
+  const { household, connectedWallet, isOwnerConnected } = useHouseholdContext();
   const tx = useTransaction();
   const { requestIdInput, setRequestIdInput, requestId, requestIdError } =
     useRequestIdInput();
@@ -314,6 +306,25 @@ function ApproveForm() {
         .rpc();
     });
   };
+
+  // Owner/Parent gate: the program rejects any non-Owner/Parent caller
+  // with `UnauthorizedRole`. Surface a clear hint up-front (mirroring
+  // FundsPanel's withdraw gate and RewardsPanel's award gate) rather than
+  // letting the user discover it via a failed transaction.
+  if (!isOwnerConnected) {
+    return (
+      <SubPanel
+        label="approve_purchase_request"
+        hint="Owner/Parent. Connect the household owner wallet (or set the owner field above to your wallet) to approve requests."
+      >
+        <p className="rounded-lg border border-dashed border-slate-700 bg-slate-950/30 px-4 py-3 text-xs text-slate-400">
+          The connected wallet is not the resolved household owner.
+          Approvals are restricted to the owner in this reference UI; the
+          on-chain gate admits Owner and Parent roles.
+        </p>
+      </SubPanel>
+    );
+  }
 
   return (
     <SubPanel
@@ -356,7 +367,7 @@ function ApproveForm() {
 
 function RejectForm() {
   const program = useProgram();
-  const { household, connectedWallet } = useHouseholdContext();
+  const { household, connectedWallet, isOwnerConnected } = useHouseholdContext();
   const tx = useTransaction();
   const { requestIdInput, setRequestIdInput, requestId, requestIdError } =
     useRequestIdInput();
@@ -389,6 +400,25 @@ function RejectForm() {
         .rpc();
     });
   };
+
+  // Owner/Parent gate: the program rejects any non-Owner/Parent caller
+  // with `UnauthorizedRole`. Surface a clear hint up-front (mirroring
+  // FundsPanel's withdraw gate and RewardsPanel's award gate) rather than
+  // letting the user discover it via a failed transaction.
+  if (!isOwnerConnected) {
+    return (
+      <SubPanel
+        label="reject_purchase_request"
+        hint="Owner/Parent. Connect the household owner wallet (or set the owner field above to your wallet) to reject requests."
+      >
+        <p className="rounded-lg border border-dashed border-slate-700 bg-slate-950/30 px-4 py-3 text-xs text-slate-400">
+          The connected wallet is not the resolved household owner.
+          Rejections are restricted to the owner in this reference UI; the
+          on-chain gate admits Owner and Parent roles.
+        </p>
+      </SubPanel>
+    );
+  }
 
   return (
     <SubPanel
@@ -546,7 +576,7 @@ function ConfirmRestockForm() {
 
 function CloseForm() {
   const program = useProgram();
-  const { household, connectedWallet } = useHouseholdContext();
+  const { household, connectedWallet, isOwnerConnected } = useHouseholdContext();
   const tx = useTransaction();
   const { requestIdInput, setRequestIdInput, requestId, requestIdError } =
     useRequestIdInput();
@@ -578,6 +608,25 @@ function CloseForm() {
         .rpc();
     });
   };
+
+  // Owner/Parent gate: the program rejects any non-Owner/Parent caller
+  // with `UnauthorizedRole`. Surface a clear hint up-front (mirroring
+  // FundsPanel's withdraw gate and RewardsPanel's award gate) rather than
+  // letting the user discover it via a failed transaction.
+  if (!isOwnerConnected) {
+    return (
+      <SubPanel
+        label="close_purchase_request"
+        hint="Owner/Parent. Connect the household owner wallet (or set the owner field above to your wallet) to close requests."
+      >
+        <p className="rounded-lg border border-dashed border-slate-700 bg-slate-950/30 px-4 py-3 text-xs text-slate-400">
+          The connected wallet is not the resolved household owner.
+          Closures are restricted to the owner in this reference UI; the
+          on-chain gate admits Owner and Parent roles.
+        </p>
+      </SubPanel>
+    );
+  }
 
   return (
     <SubPanel
