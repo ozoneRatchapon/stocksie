@@ -9,7 +9,7 @@ import {
 import { WalletModalProvider } from "@solana/wallet-adapter-react-ui";
 import type { Adapter } from "@solana/wallet-adapter-base";
 import { LocalKeypairWalletAdapter } from "@/lib/adapters/localKeypairWalletAdapter";
-import { RPC_ENDPOINT, RPC_COMMITMENT } from "@/lib/constants";
+import { RPC_ENDPOINT, RPC_WS_ENDPOINT, RPC_COMMITMENT } from "@/lib/constants";
 import { HouseholdContextProvider } from "@/hooks/useHouseholdContext";
 import { RefreshProvider } from "@/hooks/useRefresh";
 import "@solana/wallet-adapter-react-ui/styles.css";
@@ -46,7 +46,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <ConnectionProvider
       endpoint={RPC_ENDPOINT}
-      config={{ commitment: RPC_COMMITMENT }}
+      config={{ commitment: RPC_COMMITMENT, wsEndpoint: RPC_WS_ENDPOINT }}
     >
       <WalletProvider wallets={wallets} autoConnect>
         <WalletModalProvider>

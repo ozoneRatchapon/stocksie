@@ -6,17 +6,34 @@
 // Cluster / RPC (Surfpool localnet by default)
 // ---------------------------------------------------------------------------
 
-type Commitment = 'processed' | 'confirmed' | 'finalized';
+type Commitment = "processed" | "confirmed" | "finalized";
 
 const envRpc = process.env.NEXT_PUBLIC_RPC_ENDPOINT;
-const envCommitment = process.env.NEXT_PUBLIC_RPC_COMMITMENT as Commitment | undefined;
+const envCommitment = process.env.NEXT_PUBLIC_RPC_COMMITMENT as
+  | Commitment
+  | undefined;
 const envProgramId = process.env.NEXT_PUBLIC_PROGRAM_ID;
 
 /** Surfpool local RPC. Surfpool's default localnet endpoint. */
 export const RPC_ENDPOINT: string =
-  envRpc && envRpc.trim().length > 0 ? envRpc.trim() : 'http://127.0.0.1:8899';
+  envRpc && envRpc.trim().length > 0 ? envRpc.trim() : "http://127.0.0.1:8899";
 
-export const RPC_COMMITMENT: Commitment = envCommitment ?? 'confirmed';
+/**
+ * Explicit WebSocket endpoint for the Solana connection.
+ *
+ * `@solana/web3.js` derives the WS URL by default as `ws://<host>:<rpcPort+1>/`
+ * — the legacy `solana-test-validator` convention (RPC on 8899, WS on 8900).
+ * Surfnet uses a different offset: RPC on 8899, WS on **8890** (one below, not
+ * one above). The derived `ws://127.0.0.1:8900/` connects to nothing and the
+ * wallet adapter logs `ws error: undefined` on every subscription; pinning
+ * `wsEndpoint` to 8890 fixes it. Override via `NEXT_PUBLIC_RPC_WS_ENDPOINT`
+ * for non-default deployments.
+ */
+const envWs = process.env.NEXT_PUBLIC_RPC_WS_ENDPOINT;
+export const RPC_WS_ENDPOINT: string =
+  envWs && envWs.trim().length > 0 ? envWs.trim() : "ws://127.0.0.1:8890";
+
+export const RPC_COMMITMENT: Commitment = envCommitment ?? "confirmed";
 
 /**
  * Stocksie program id. Must match `Anchor.toml` `[programs.localnet] stocksie`
@@ -25,7 +42,7 @@ export const RPC_COMMITMENT: Commitment = envCommitment ?? 'confirmed';
 export const PROGRAM_ID: string =
   envProgramId && envProgramId.trim().length > 0
     ? envProgramId.trim()
-    : 'At2vd5Mqd9xcHRFAZin1VHb6upEsF1GCXoFG19UHsQoj';
+    : "At2vd5Mqd9xcHRFAZin1VHb6upEsF1GCXoFG19UHsQoj";
 
 // ---------------------------------------------------------------------------
 // PDA seeds (mirror `programs/stocksie/src/constants.rs`)
@@ -38,9 +55,9 @@ export const PROGRAM_ID: string =
 // ---------------------------------------------------------------------------
 
 const encoder = new TextEncoder();
-export const HOUSEHOLD_SEED: Uint8Array = encoder.encode('household');
-export const MEMBER_SEED: Uint8Array = encoder.encode('member');
-export const PURCHASE_SEED: Uint8Array = encoder.encode('purchase');
+export const HOUSEHOLD_SEED: Uint8Array = encoder.encode("household");
+export const MEMBER_SEED: Uint8Array = encoder.encode("member");
+export const PURCHASE_SEED: Uint8Array = encoder.encode("purchase");
 
 // ---------------------------------------------------------------------------
 // Reward schedule (Feature 2.5 — gamification)

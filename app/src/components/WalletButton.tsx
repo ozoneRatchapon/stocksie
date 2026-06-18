@@ -1,5 +1,6 @@
-'use client';
+"use client";
 
+import { useEffect, useState } from "react";
 import { BaseWalletMultiButton } from "@solana/wallet-adapter-react-ui";
 
 /**
@@ -39,5 +40,24 @@ const WALLET_BUTTON_LABELS = {
 } as const;
 
 export function WalletButton() {
+  // `BaseWalletMultiButton` depends on Wallet Standard detection
+  // (`window.solana` / `window.phantom.*` etc.) which only runs in the
+  // browser. During SSR no wallets are detected, so it renders the bare
+  // "Sign in" label; on the client's first render, Wallet Standard fires and
+  // the button flips to its `ready` state with the `<i class="wallet-adapter-
+  // button-start-icon">` slot — a genuine server/client divergence that
+  // triggers a hydration-mismatch error (and a full tree re-render) on every
+  // page load. `suppressHydrationWarning` can't fix it because the mismatch is
+  // deep in the button subtree, not on a tag we render.
+  //
+  // The standard Solana dApp fix: gate the render on a `mounted` flag that
+  // flips in `useEffect`. SSR renders `null`; the client's first render also
+  // renders `null` (matching the server, no mismatch); then `useEffect` runs,
+  // `mounted` becomes true, and the real button appears. The ~1-frame gap is
+  // imperceptible and beats a console error + full subtree re-render on every
+  // navigation.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  if (!mounted) return null;
   return <BaseWalletMultiButton labels={WALLET_BUTTON_LABELS} />;
 }
