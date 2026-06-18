@@ -212,18 +212,28 @@ reconciled this session (`develop` fast-forwarded to `main` at `f957bef`).
   zero First Load bloat until Phase D wires them in). No Rust files touched.
 
 ### Phase B — Shelf DB UI + product onboarding (no camera yet)
-- [ ] **B.1** `components/shelf/ShelfList.tsx` — table/list of products, edit,
-  delete. Empty state.
-- [ ] **B.2** `components/shelf/ProductOnboardingForm.tsx` — required fields
-  (`name`, `packUnits`, `unitGrams`), optional (`brand`, `category`,
-  `defaultPriceLamports`). Validation blocks submit.
-- [ ] **B.3** Wire a route or panel to reach ShelfList (likely a "Shelf" tab — but
-  the tabbed layout is plan 005 Layer 3, deferred; for now, a route
-  `/shelf` reachable from the Dashboard).
-- [ ] **B.4** Manual barcode entry path: a text input lets you type/SKU-an item
-  without a camera, so the layer is usable on desktop.
-- [ ] **B.5** Verify: typecheck + build; shelf persists across reload (IndexedDB
-  survives).
+- [x] **B.1** `components/shelf/ShelfList.tsx` — list of products with edit,
+  delete (inline two-step confirm), loading skeleton, load-error retry, and a
+  friendly empty state with a single CTA. Sorts by name (case-insensitive),
+  stable by `createdAt`.
+- [x] **B.2** `components/shelf/ProductOnboardingForm.tsx` — required fields
+  (`name`, `packUnits`, `unitGrams`) with submit gated until valid; optional
+  (`brand`, `category`, `defaultPriceLamports`). Same component serves create
+  + edit (barcode read-only on edit). Calm-UX validation: empty required
+  fields disable submit without a red flash; non-empty invalid fields show an
+  error.
+- [x] **B.3** `/shelf` route wired (`app/shelf/page.tsx`) and reachable from the
+  Dashboard header via a "📦 Shelf" link. **Q2 resolved: route chosen** (tabbed
+  layout still deferred to plan 005 Layer 3). The route is wallet-agnostic —
+  the shelf is off-chain, so it works before connecting.
+- [x] **B.4** Manual barcode entry: an optional Barcode field on the create form.
+  Left blank → a synthetic `manual-<uuid>` id is generated via
+  `crypto.randomUUID()` (with a timestamp fallback). Edit mode shows the
+  barcode read-only since it's the IndexedDB keyPath.
+- [x] **B.5** Verify: `typecheck` → exit 0; `build` → exit 0 (`/shelf` = 117 kB
+  First Load, `/` = 264 kB); `vitest` → 10/10 (no regression). IndexedDB
+  persistence is structural (survives reload by design — `getDb()` is a
+  cached singleton over `idb`).
 
 ### Phase C — Barcode scanner (camera)
 - [ ] **C.1** `app/scan/page.tsx` using `html5-qrcode`. Permission flow with
@@ -296,7 +306,7 @@ reconciled this session (`develop` fast-forwarded to `main` at `f957bef`).
 |---|---|---|---|---|
 | `f957bef` (baseline, post-reframe) | 70.8 kB | 259 kB | — | Plan 005 §4c landed. |
 | Phase A (engine + DB, unimported) | 70.8 kB | 259 kB | 0 / 0 | Byte-identical: the new lib modules + `idb` aren't imported by any route → tree-shaken out. |
-| _(Phase B/C/D…)_ | TBD | TBD | TBD | |
+| Phase B (shelf UI) | 67.4 kB | 264 kB | −3.4 / +5 | `/` route: small First Load bump from the Dashboard "Shelf" link (chunk reorg). New `/shelf` route is 117 kB First Load — lean, since it doesn't pull Solana/wallet-adapter into its own chunk. |
 
 Watch the scanner dep — `html5-qrcode` is the heaviest add; lazy-load it only on
 `/scan` (dynamic import, `ssr: false`) to keep the landing/dashboard First Load
@@ -304,18 +314,20 @@ flat.
 
 ## 8. Status
 
-**Phase A DONE** (pure engine + data model, on `feature/offchain-inventory`
-rebased onto `main` @ `d0961c3`). The `compareOffers()` ranking is pure, float-
-free (bigint cross-products on milligram-scaled weights), with 10 vitest tests
-green. `lib/db.ts` + `lib/shelf.ts` give a typed, SSR-safe IndexedDB shelf.
-`pnpm -C app test` → 10/10; `typecheck` → exit 0; `build` → exit 0,
-byte-identical bundle (zero First Load bloat — nothing imports the new modules
-yet). No Rust files touched. Q1 (test runner) resolved: vitest added.
+**Phases A + B DONE** (on `feature/offchain-inventory`). Phase A: pure
+`compareOffers()` engine (float-free bigint cross-products on milligram-scaled
+weights) + typed SSR-safe IndexedDB shelf (`db.ts`, `shelf.ts`), 10 vitest
+tests green. Phase B: shelf catalog UI — `components/shelf/ShelfList.tsx`
+(browse/edit/delete + empty state) and `components/shelf/ProductOnboardingForm.tsx`
+(create/edit with validation + manual barcode → synthetic `manual-<uuid>`),
+reachable at the `/shelf` route from the Dashboard. No Rust files touched.
+Gates: `typecheck` → exit 0; `build` → exit 0 (`/shelf` 117 kB First Load);
+`vitest` → 10/10. Q1 (test runner) + Q2 (route vs tab → route) resolved.
 
-Next: **Phase B → D → E** (shelf UI, purchase-panel integration, reward
-trigger), then **C** (camera scanner, last — so the product works fully without
-a camera), then **F** (tests/docs + drop the landing "Coming soon" badge).
-Phases B–E are unblocked; Q2–Q5 can be answered inline as they come up.
+Next: **Phase D → E** (best-value modal + `PurchasePanel` integration, then the
+`REWARD_COST_SAVING` trigger), then **C** (camera scanner, last — so the product
+works fully without a camera), then **F** (tests/docs + drop the landing
+"Coming soon" badge). Phases D–E are unblocked; Q3–Q5 can be answered inline.
 
 ## 9. Open questions (need PO input before/during build)
 
@@ -323,9 +335,10 @@ Phases B–E are unblocked; Q2–Q5 can be answered inline as they come up.
   `vitest ^4.1.9` as a devDep with a minimal `app/vitest.config.ts` (node env).
   10 `bestValue` tests green. Convention: co-located `*.test.ts` next to the
   module.
-- **Q2 — Shelf route vs tab.** Plan 005 Layer 3 (tabbed layout) is deferred. For
-  now, is `/shelf` as a route acceptable, or should the shelf live behind a
-  "Shelf" button on the Dashboard?
+- **Q2 — Shelf route vs tab.** ✅ **Resolved (Phase B):** `/shelf` as a route,
+  linked from the Dashboard header. Plan 005 Layer 3 (tabbed layout) remains
+  deferred. The route is wallet-agnostic (the shelf is off-chain, so it works
+  before a wallet is connected) — a deliberate web2-friendly choice.
 - **Q3 — Buyer self-claim of cost-saving reward.** The no-Rust path requires an
   Owner/Parent to be in the loop to fire `award_reward`. Acceptable for MVP, or
   is buyer-self-claim a hard requirement (which would push a new on-chain
