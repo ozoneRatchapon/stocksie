@@ -45,6 +45,28 @@ per-phase tracker.
       defenses, cross-cutting reconciliation invariants, the privacy grep, and the
       space budget.
 
+### Off-chain client surface — shipped post-MVP ✅
+
+These live client-side (no on-chain surface beyond the program's existing hash
+hooks). Documented here so the roadmap reflects what actually ships today.
+
+- [x] **Web2-friendly landing + UI** — copy-framed for non-crypto users (plan
+      005), with the best-value engine surfaced as a live feature (no longer
+      "Coming soon").
+- [x] **Off-chain shelf catalog (IndexedDB, per-device)** — product names,
+      pack sizes, and unit weights live in the browser, never on chain (plan
+      006 §A–B). Keyed by barcode; supports camera onboarding via `/scan`.
+- [x] **Best-value comparison engine** — pure float-free bigint price-per-unit
+      ranking (plan 006 §A, 10 unit tests), surfaced in the create + restock
+      flows via the compare-prices modal. Only blake3 hashes reach the chain as
+      `unit_cost_hash`.
+- [x] **`REWARD_COST_SAVING` wired** — the reserved 50-pt reward is now granted
+      by the Owner/Parent off the off-chain cost-saving computation (plan 006
+      §E), closing the loop the program's hash hooks left open.
+- [x] **Barcode scanner** — `/scan` route wraps `html5-qrcode` with
+      dynamic-import (`ssr:false`) isolation so its heavy dep stays out of the
+      landing/shelf First Load (plan 006 §C).
+
 ---
 
 ## 2. Next horizon (~4 weeks)
@@ -77,12 +99,21 @@ ceiling. The scanned receipt text never goes on chain — at most a `blake3` of 
 OCR'd text could be recorded for tamper-evidence (the boundary already permits
 this; the MVP does not wire it).
 
+> **Status note.** The off-chain comparison engine itself now ships (see §1
+> "Off-chain client surface"), so the price-per-unit arithmetic this feature
+> would lean on already exists; the remaining work is OCR + receipt↔request
+> matching, not the math.
+
 ### Predictive refill
 
 Learn per-household consumption patterns **off-chain** (e.g. "detergent runs out
 every 18 days") and surface a "you'll run out Thursday" hint before the last one
 is used. The hint triggers a pre-emptive `create_purchase_request`. No new on-chain
 state: the pattern is derived from the event stream and stored client-side.
+
+> **Status note.** The shelf catalog (§1) is the natural home for the
+> consumption history this feature would mine; the groundwork is in place, the
+> learning logic is not.
 
 ---
 

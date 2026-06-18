@@ -357,12 +357,15 @@ overclaimed. The landing is now semantically aligned with the PO's vision
 and honest about the best-value gap. Copy-only on `main` (commits `deeb6e8`
 + this reframe).
 
-**Path B (best-value engine) is the recommended NEXT feature.** Builds the
-off-chain price-per-unit comparison, surfaces it in the purchase flow (the
-`unit_cost_hash` capture points already exist), and wires the reserved
-`REWARD_COST_SAVING` (50 pts) to a real handler. Will let the "Smart
-buying" card drop its "Coming soon" badge and become the headline feature.
-Scope as a new plan (e.g. `006_best_value_engine.md`).
+**Path B (best-value engine) — DONE (plan 006).** The off-chain price-per-unit
+comparison engine shipped (plan 006 §A–F): shelf catalog, compare-prices modal
+wired into the create + restock flows, and the reserved `REWARD_COST_SAVING`
+(50 pts) now granted by the Owner/Parent off the off-chain cost-saving
+computation. The "Smart buying" card on the landing has dropped its "Coming
+soon" badge and become a live headline feature (plan 006 §F.5) — closing the
+Path A→B loop this section originally called for. See
+[006_offchain_inventory_and_best_value.md](006_offchain_inventory_and_best_value.md)
+for the full build log.
 
 Layers 2 (visual warmth) and 3 (guided flow) remain deferred — pick up
 after Path B or in parallel, PO's call.

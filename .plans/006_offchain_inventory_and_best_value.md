@@ -319,18 +319,33 @@ reconciled this session (`develop` fast-forwarded to `main` at `f957bef`).
   Phase F handoff item; no code change is expected to be needed for it.
 
 ### Phase F — Tests, docs, landing badge
-- [ ] **F.1** bestValue unit tests (A.5) green; add a Shelf DB integration test
+- [x] **F.1** bestValue unit tests (A.5) green; add a Shelf DB integration test
   (in-memory fake-indexeddb if available, else smoke-only).
-- [ ] **F.2** Privacy re-audit: `rg` for any cleartext price/name reaching a
+  → Smoke-only: 6 SSR-safety tests in `app/src/lib/shelf.test.ts` pin the
+    invariant that every `shelf.ts` helper rejects (not silently succeeds) when
+    `indexedDB` is undefined — the property that protects the Next.js server
+    graph. fake-indexeddb not installed; plan permits smoke-only.
+- [x] **F.2** Privacy re-audit: `rg` for any cleartext price/name reaching a
   program method call — must be zero outside `toHash32`.
-- [ ] **F.3** Update `docs/INSTRUCTIONS.md` "Honest note": remove the "not
+  → Clean. Every string-shaped on-chain arg (`name_hash`, `item_hash`,
+    `unit_cost_hash`, `reason_hash`, reject `reason_hash`) comes from
+    `toHash32()`. Cleartext benchmark/actual per-unit data flows only to
+    `pendingSnapshots` (in-memory, client-side), never to a `.methods.*` call.
+- [x] **F.3** Update `docs/INSTRUCTIONS.md` "Honest note": remove the "not
   granted by any MVP handler" caveat for `REWARD_COST_SAVING` (it now is).
-- [ ] **F.4** Update `docs/ROADMAP.md` §2 if appropriate (the best-value engine
+  → Reward-schedule row rewritten; "Honest note" replaced with an
+    "Off-chain scoring" note that describes the actual trigger path.
+- [x] **F.4** Update `docs/ROADMAP.md` §2 if appropriate (the best-value engine
   was implicitly in §1 feature #3; now it ships — reflect honestly).
-- [ ] **F.5** Landing: drop the `Coming soon` badge from the "Smart buying" card
+  → Added a new "Off-chain client surface — shipped post-MVP" subsection under
+    §1; added "Status note" callouts to §2's AI receipt scanning + predictive
+    refill items that referenced the (then-unbuilt) off-chain engine.
+- [x] **F.5** Landing: drop the `Coming soon` badge from the "Smart buying" card
   (`app/src/components/Landing.tsx`, `HookCard badge="Coming soon"`) and refresh
   the body copy to "live". This closes plan 005 §4c's Path A→B loop.
-- [ ] **F.6** Update plan 005 §9 and this plan §8 status; handover doc.
+  → Badge removed; copy rewritten to describe the live compare + reward loop.
+    Header comment updated to match.
+- [x] **F.6** Update plan 005 §9 and this plan §8 status; handover doc.
 
 ## 6. Verification gates (definition of done)
 
@@ -351,6 +366,7 @@ reconciled this session (`develop` fast-forwarded to `main` at `f957bef`).
 | Phase D (best-value modal) | 70.8 kB | 269 kB | +3.4 / +5 | `/` route: +5 kB First Load for `BestValueModal` + `Modal` primitive + `pendingSnapshots` (now imported by PurchasePanel). `/shelf` unchanged at 117 kB. |
 | Phase E (cost-saving trigger) | 71.7 kB | 270 kB | +0.9 / +1 | `/` route: +1 kB First Load for `CostSavingRewardForm` + `CostSavingHint` + the pure `costSaving` module (all imported by PurchasePanel). `/shelf` unchanged at 117 kB (Phase E touches no shelf code). |
 | Phase C (barcode scanner) | 73 kB | 270 kB | +1.3 / 0 | `/` route: +1.3 kB for the new "Scan" header link on the Dashboard (no scanner code lands here). `/shelf` 117 kB (small +0.8 kB bump from the inline "Or scan a barcode →" link). New `/scan` route is **109 kB First Load** — *less* than `/shelf`, because `html5-qrcode` is dynamic-imported with `ssr:false` and lands in a lazy chunk that only loads when the scanner mounts. |
+| Phase F (closeout: tests, docs, landing) | 73 kB | 270 kB | 0 / 0 | Byte-for-byte unchanged bundles. The Landing edit is copy-only (the "Smart buying" card lost its badge and gained a sentence); the new `shelf.test.ts` is excluded from the client bundle (test file); docs are not bundled. `vitest` 32/32 (added 6 shelf SSR-safety tests). |
 
 Watch the scanner dep — `html5-qrcode` is the heaviest add; lazy-load it only on
 `/scan` (dynamic import, `ssr: false`) to keep the landing/dashboard First Load
@@ -358,36 +374,73 @@ flat.
 
 ## 8. Status
 
-**Phases A + B + C + D + E DONE** (on `feature/offchain-inventory`). Phase A: pure
-`compareOffers()` engine (float-free bigint cross-products on milligram-scaled
-weights) + typed SSR-safe IndexedDB shelf (`db.ts`, `shelf.ts`). Phase B: shelf
-catalog UI (`ShelfList` + `ProductOnboardingForm`) at the `/shelf` route.
-Phase D: best-value compare modal (`BestValueModal` on a new `Modal` primitive)
-wired into both the create and restock forms, with an in-memory
-`pendingSnapshots` store (D.3) carrying the cleartext per-unit data that Phase E
-scores — structured data stays client-side; only blake3 hashes go on-chain.
-Phase E: `computeCostSaving` (pure, 10 tests) + `CostSavingRewardForm` in
-PurchasePanel — Owner/Parent reads the snapshot for a request, and if the
-buyer beat the benchmark, fires the EXISTING `award_reward` for
-`REWARD_COST_SAVING` (50 pts), then clears the snapshot to prevent double-award.
-Phase C: `/scan` route + `BarcodeScanner` (wraps `html5-qrcode`) + `ScanClient`
-orchestrator; camera is dynamic-imported with `ssr:false` so its heavy dep
-lives in a lazy chunk and `/scan` First Load is just 109 kB. Unknown scans
-prefill `ProductOnboardingForm` via a new `initialBarcode` prop; manual entry
-is always available as the camera-less / insecure-context fallback.
-No Rust files touched. Gates: `typecheck` → exit 0; `build` → exit 0 (`/` 270 kB
-First Load, `/shelf` 117 kB, `/scan` 109 kB); `vitest` → 26/26 (10 bestValue +
-6 pendingSnapshots + 10 costSaving). Q1 (test runner) + Q2 (route vs tab →
-route) + Q3 (Owner/Parent gate accepted as MVP) + Q5 (`html5-qrcode` accepted)
-resolved.
+**ALL PHASES DONE (A + B + C + D + E + F)** on `feature/offchain-inventory`.
+No Rust files touched across the whole plan — every change is under `app/`, the
+plan file itself, or `docs/`.
 
-Next: **F only**. **Phase F** (the closeout): privacy re-audit (grep for any
-cleartext item/price reaching a program method call), drop the landing
-"Coming soon" badge, refresh docs/roadmap, and the two manual browser smokes
-that weren't run inline (E.4 cost-saving reward flow on localnet; C.4 camera +
-manual + unknown→onboarding→shelf round-trip). Q4 (per-device in-memory
-snapshots accepted for MVP, clean seam to swap to IndexedDB) is the only
-still-open question and it's a documented limitation, not a blocker.
+- **Phase A** — pure `compareOffers()` engine (float-free bigint cross-products
+  on milligram-scaled weights, 10 tests) + typed SSR-safe IndexedDB shelf
+  (`db.ts`, `shelf.ts`).
+- **Phase B** — shelf catalog UI (`ShelfList` + `ProductOnboardingForm`) at the
+  `/shelf` route.
+- **Phase D** — best-value compare modal (`BestValueModal` on a new `Modal`
+  primitive) wired into both the create and restock forms, with an in-memory
+  `pendingSnapshots` store (D.3) carrying the cleartext per-unit data that
+  Phase E scores — structured data stays client-side; only blake3 hashes go
+  on-chain.
+- **Phase E** — `computeCostSaving` (pure, 10 tests) + `CostSavingRewardForm`
+  in PurchasePanel: Owner/Parent reads the snapshot for a request, and if the
+  buyer beat the benchmark, fires the EXISTING `award_reward` for
+  `REWARD_COST_SAVING` (50 pts), then clears the snapshot to prevent
+  double-award.
+- **Phase C** — `/scan` route + `BarcodeScanner` (wraps `html5-qrcode`) +
+  `ScanClient` orchestrator; camera is dynamic-imported with `ssr:false` so its
+  heavy dep lives in a lazy chunk and `/scan` First Load is just 109 kB.
+  Unknown scans prefill `ProductOnboardingForm` via a new `initialBarcode` prop;
+  manual entry is always available as the camera-less / insecure-context
+  fallback.
+- **Phase F** (the closeout):
+  - **F.1** shelf SSR-safety smoke test (`app/src/lib/shelf.test.ts`, 6 tests)
+    pins the invariant that every `shelf.ts` helper rejects cleanly when
+    `indexedDB` is undefined — fake-indexeddb not installed, plan permits
+    smoke-only.
+  - **F.2** privacy re-audit clean: every string-shaped on-chain arg comes
+    from `toHash32()`; cleartext per-unit data never reaches a `.methods.*`
+    call.
+  - **F.3** `docs/INSTRUCTIONS.md` reward schedule rewritten — the
+    `REWARD_COST_SAVING` row and its "Honest note" caveat now describe the
+    actual off-chain trigger path.
+  - **F.4** `docs/ROADMAP.md` gained an "Off-chain client surface — shipped
+    post-MVP" subsection under §1, plus "Status note" callouts on §2's
+    AI receipt scanning + predictive refill items that referenced the
+    then-unbuilt off-chain engine.
+  - **F.5** Landing "Smart buying" card lost its `Coming soon` badge; copy
+    refreshed to describe the live compare + reward loop. Closes plan 005
+    §4c's Path A→B loop.
+  - **F.6** this status update + plan 005 §9 update + handover doc.
+
+**Gates:** `pnpm -C app typecheck` → exit 0; `pnpm -C app build` → exit 0 (`/`
+73 kB / 270 kB First Load, `/shelf` 117 kB, `/scan` 109 kB — all unchanged
+from Phase C); `pnpm -C app test` → **32/32** (10 bestValue + 6 pendingSnapshots
++ 10 costSaving + 6 shelf).
+
+**Open questions closed by this plan:** Q1 (test runner → vitest), Q2 (route
+vs tab → route), Q3 (Owner/Parent gate accepted as MVP, documented), Q5
+(`html5-qrcode` accepted).
+
+**Remaining documented limitation (not a blocker):** Q4 — per-device in-memory
+`pendingSnapshots` doesn't survive reload / isn't cross-device. Clean seam in
+`lib/pendingSnapshots.ts` means swapping to IndexedDB only changes that file's
+bodies, not call sites.
+
+**Deferred manual smokes (fold into a future manual QA pass, not blockers):**
+- E.4 — live localnet (Surfpool) end-to-end cost-saving reward flow.
+- C.4 — `pnpm -C app dev` camera + manual + unknown→onboarding→shelf
+  round-trip.
+
+**Git hygiene before merge:** fast-forward `develop` to `main` (currently
+behind by the plan 006 draft commit `d0961c3`), then merge
+`feature/offchain-inventory` → `main`.
 
 ## 9. Open questions (need PO input before/during build)
 

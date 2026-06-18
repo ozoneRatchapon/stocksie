@@ -11,7 +11,7 @@
 //   1. Hero       — one-line value prop + the primary "Get started" CTA.
 //   2. Hook       — three "what Stocksie helps with" cards, mapped to the
 //                   product's true headline: supply tracking, family sharing,
-//                   and smart buying (the comparison engine is on the roadmap).
+//                   and smart buying (the comparison engine now ships).
 //   3. Example    — a concrete worked scenario (the Lee household) that turns
 //                   the abstract product into something tangible.
 //   4. Final CTA  — a second entry point for users who scrolled to the bottom.
@@ -89,8 +89,7 @@ export function Landing() {
           <HookCard
             icon="🧠"
             title="Smart buying"
-            badge="Coming soon"
-            body="A price-per-unit comparison that tells you which pack size is actually cheaper. On the roadmap — the groundwork is already on-chain."
+            body="A price-per-unit comparison that tells you which pack size is actually cheaper — and rewards the buyer when they beat the benchmark. Compare offers at a glance before you approve."
           />
         </div>
       </section>

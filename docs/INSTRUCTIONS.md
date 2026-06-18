@@ -416,12 +416,16 @@ auto-reward stage fires at most once per request, tracked by the per-request
 | `REWARD_LOW_STOCK_REPORT`   |     10 | `create_purchase_request` (reporter)                                                          |
 | `REWARD_RESTOCK_COMPLETED`  |     25 | `confirm_restock` (buyer)                                                                     |
 | `REWARD_FULL_RUN_COMPLETED` |     15 | `reimburse_buyer` (buyer)                                                                     |
-| `REWARD_COST_SAVING`        |     50 | reserved — awarded by the off-chain best-value engine hook; not wired to a handler in the MVP |
+| `REWARD_COST_SAVING`        |     50 | `award_reward` (Owner/Parent), fired by the off-chain best-value hook when the buyer beats the benchmark per-unit snapshot |
 
-> **Honest note.** `REWARD_COST_SAVING` is defined but not granted by any MVP
-> handler. It is the hook the off-chain engine (Feature 2.3) will use once the
-> cost-savings scoring loop ships; including it here avoids renumbering the
-> schedule later.
+> **Off-chain scoring.** `REWARD_COST_SAVING` is the only reward whose trigger
+> condition the program cannot evaluate: the per-unit benchmark and actual are
+> cleartext, kept client-side in `pendingSnapshots` (per the privacy boundary,
+> only their blake3 hashes go on chain as `unit_cost_hash`). The Owner/Parent
+> runs `computeCostSaving` off the snapshot and, if the buyer paid less per unit
+> than the benchmark, signs an `award_reward` for `REWARD_COST_SAVING` with a
+> deterministic `cost-saving:request:<id>:<saving>` `reason_hash`. The snapshot
+> is then cleared to prevent double-award. See plan 006 §4.5.
 
 ---
 
