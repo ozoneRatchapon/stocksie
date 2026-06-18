@@ -51,11 +51,14 @@ export function Dashboard() {
             Shop together, stay on budget, earn rewards.
           </p>
         </div>
-        {/* The shelf is the off-chain catalog of household essentials (plan
-            006, Phase B). It lives on its own route because the tabbed layout
-            (plan 005 Layer 3) is deferred — see Q2 in plan 006 §9. Reachable
-            whether or not a wallet is connected: the shelf is per-device
-            IndexedDB, so cataloging works before onboarding to Solana. */}
+        {/* The shelf and scanner are the off-chain catalog of household
+            essentials (plan 006, Phase B + C). Each lives on its own route
+            because the tabbed layout (plan 005 Layer 3) is deferred — see Q2
+            in plan 006 §9. Reachable whether or not a wallet is connected:
+            both are per-device IndexedDB, so cataloging works before
+            onboarding to Solana. The scanner is dynamically imported with
+            `ssr:false` on its own route, so it doesn't weigh down the
+            dashboard's First Load. */}
         <div className="flex items-center gap-2">
           <Link
             href="/shelf"
@@ -63,6 +66,13 @@ export function Dashboard() {
           >
             <span aria-hidden="true">📦</span>
             Shelf
+          </Link>
+          <Link
+            href="/scan"
+            className="inline-flex h-10 items-center gap-2 rounded-lg border border-slate-700 bg-slate-800 px-4 text-sm font-medium text-slate-100 transition-colors hover:bg-slate-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-500"
+          >
+            <span aria-hidden="true">📷</span>
+            Scan
           </Link>
           <WalletButton />
         </div>

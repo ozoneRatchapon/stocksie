@@ -236,17 +236,39 @@ reconciled this session (`develop` fast-forwarded to `main` at `f957bef`).
   cached singleton over `idb`).
 
 ### Phase C — Barcode scanner (camera)
-- [ ] **C.1** `app/scan/page.tsx` using `html5-qrcode`. Permission flow with
-  clear copy. Graceful fallback to manual entry on: no camera, permission
-  denied, non-HTTPS dev (document `next dev` localhost caveat), or user
-  preference.
-- [ ] **C.2** On scan: `shelf.findByBarcode(code)` → known: show product + "add
-  to shopping list" / "start purchase"; unknown: route to
-  `ProductOnboardingForm` prefilled with the barcode.
-- [ ] **C.3** Desktop / SSR safety: scanner only mounts client-side
-  (`'use client'` + dynamic import with `ssr: false` where needed).
-- [ ] **C.4** Verify: build; manual smoke on `pnpm -C app dev` (camera + manual
-  fallback + unknown→onboarding→shelf round-trip).
+- [x] **C.1** `app/src/app/scan/page.tsx` (Client Component) uses
+  `next/dynamic({ ssr: false })` to lazy-load the scanner body
+  (`app/src/components/scan/ScanClient.tsx` → `BarcodeScanner.tsx`), which
+  wraps `html5-qrcode`'s `Html5Qrcode` class. The scanner does NOT autostart —
+  a user gesture ("Start camera") kicks off `getCameras()` + `start(...)`, so
+  desktops without a webcam get an explicit "no camera" state instead of a
+  silent failure. Graceful fallbacks with specific copy for: insecure context
+  (`!window.isSecureContext`), no camera (`getCameras()` empty), permission
+  denied / `NotAllowedError`, hardware-in-use / `NotReadableError`, and an
+  unknown-error default. Manual barcode entry is always available alongside
+  the scanner (identical lookup path), so the page is fully usable without a
+  camera or on plain HTTP.
+- [x] **C.2** On scan (or manual submit): `findByBarcode(code)` → known:
+  show a `ProductCard` (name / brand / pack math / last price / barcode) with
+  a "Start a purchase" CTA that routes to `/` (Dashboard). Unknown: render
+  `ProductOnboardingForm` with the new `initialBarcode` prop prefilled, so
+  the user finishes onboarding without retyping the code. After a successful
+  onboarding submit, the unknown branch flips to the product-card view so
+  the user sees the just-created record. (Plan text mentioned an
+  "add to shopping list" CTA; that's deferred — there's no shopping-list
+  feature yet, so the only forward CTA is "start a purchase" on the
+  dashboard.)
+- [x] **C.3** SSR safety: `/scan/page.tsx` is `'use client'` and dynamically
+  imports `ScanClient` with `ssr: false`, so `html5-qrcode` (which touches
+  `navigator.mediaDevices`) never loads on the server. Confirmed in the
+  bundle: `/scan` First Load is **109 kB** (less than `/shelf`'s 117 kB),
+  with `html5-qrcode` isolated in a lazy chunk that only loads when the
+  scanner mounts.
+- [x] **C.4** Build green (`next build` exit 0; bundle table updated in §7).
+  **Manual smoke (camera + manual fallback + unknown→onboarding→shelf
+  round-trip) NOT executed here** — it's a live browser flow that needs a
+  webcam or a deliberate local-test barcode. Folded into the Phase F handoff
+  checklist; no code change expected.
 
 ### Phase D — Best-value modal + PurchasePanel integration
 - [x] **D.1** `components/BestValueModal.tsx` — assemble 2+ offers (from the
@@ -328,6 +350,7 @@ reconciled this session (`develop` fast-forwarded to `main` at `f957bef`).
 | Phase B (shelf UI) | 67.4 kB | 264 kB | −3.4 / +5 | `/` route: small First Load bump from the Dashboard "Shelf" link (chunk reorg). New `/shelf` route is 117 kB First Load — lean, since it doesn't pull Solana/wallet-adapter into its own chunk. |
 | Phase D (best-value modal) | 70.8 kB | 269 kB | +3.4 / +5 | `/` route: +5 kB First Load for `BestValueModal` + `Modal` primitive + `pendingSnapshots` (now imported by PurchasePanel). `/shelf` unchanged at 117 kB. |
 | Phase E (cost-saving trigger) | 71.7 kB | 270 kB | +0.9 / +1 | `/` route: +1 kB First Load for `CostSavingRewardForm` + `CostSavingHint` + the pure `costSaving` module (all imported by PurchasePanel). `/shelf` unchanged at 117 kB (Phase E touches no shelf code). |
+| Phase C (barcode scanner) | 73 kB | 270 kB | +1.3 / 0 | `/` route: +1.3 kB for the new "Scan" header link on the Dashboard (no scanner code lands here). `/shelf` 117 kB (small +0.8 kB bump from the inline "Or scan a barcode →" link). New `/scan` route is **109 kB First Load** — *less* than `/shelf`, because `html5-qrcode` is dynamic-imported with `ssr:false` and lands in a lazy chunk that only loads when the scanner mounts. |
 
 Watch the scanner dep — `html5-qrcode` is the heaviest add; lazy-load it only on
 `/scan` (dynamic import, `ssr: false`) to keep the landing/dashboard First Load
@@ -335,7 +358,7 @@ flat.
 
 ## 8. Status
 
-**Phases A + B + D + E DONE** (on `feature/offchain-inventory`). Phase A: pure
+**Phases A + B + C + D + E DONE** (on `feature/offchain-inventory`). Phase A: pure
 `compareOffers()` engine (float-free bigint cross-products on milligram-scaled
 weights) + typed SSR-safe IndexedDB shelf (`db.ts`, `shelf.ts`). Phase B: shelf
 catalog UI (`ShelfList` + `ProductOnboardingForm`) at the `/shelf` route.
@@ -347,18 +370,24 @@ Phase E: `computeCostSaving` (pure, 10 tests) + `CostSavingRewardForm` in
 PurchasePanel — Owner/Parent reads the snapshot for a request, and if the
 buyer beat the benchmark, fires the EXISTING `award_reward` for
 `REWARD_COST_SAVING` (50 pts), then clears the snapshot to prevent double-award.
+Phase C: `/scan` route + `BarcodeScanner` (wraps `html5-qrcode`) + `ScanClient`
+orchestrator; camera is dynamic-imported with `ssr:false` so its heavy dep
+lives in a lazy chunk and `/scan` First Load is just 109 kB. Unknown scans
+prefill `ProductOnboardingForm` via a new `initialBarcode` prop; manual entry
+is always available as the camera-less / insecure-context fallback.
 No Rust files touched. Gates: `typecheck` → exit 0; `build` → exit 0 (`/` 270 kB
-First Load, `/shelf` 117 kB); `vitest` → 26/26 (10 bestValue + 6 pendingSnapshots
-+ 10 costSaving). Q1 (test runner) + Q2 (route vs tab → route) + Q3 (Owner/Parent
-gate accepted as MVP — buyer cannot self-claim) resolved.
+First Load, `/shelf` 117 kB, `/scan` 109 kB); `vitest` → 26/26 (10 bestValue +
+6 pendingSnapshots + 10 costSaving). Q1 (test runner) + Q2 (route vs tab →
+route) + Q3 (Owner/Parent gate accepted as MVP) + Q5 (`html5-qrcode` accepted)
+resolved.
 
-Next: **C → F**. **Phase C** (camera scanner, deliberately last — so the product
-works fully without a camera: `html5-qrcode` dynamic-imported with `ssr:false` on
-a `/scan` route, fallback to manual entry). Then **Phase F** (privacy re-audit,
-drop the landing "Coming soon" badge, refresh docs/roadmap, manual localnet e2e
-for E.4). Q4 (per-device in-memory snapshots accepted for MVP, clean seam to
-swap to IndexedDB) + Q5 (`html5-qrcode` default, confirm at C kickoff) to be
-resolved inline.
+Next: **F only**. **Phase F** (the closeout): privacy re-audit (grep for any
+cleartext item/price reaching a program method call), drop the landing
+"Coming soon" badge, refresh docs/roadmap, and the two manual browser smokes
+that weren't run inline (E.4 cost-saving reward flow on localnet; C.4 camera +
+manual + unknown→onboarding→shelf round-trip). Q4 (per-device in-memory
+snapshots accepted for MVP, clean seam to swap to IndexedDB) is the only
+still-open question and it's a documented limitation, not a blocker.
 
 ## 9. Open questions (need PO input before/during build)
 

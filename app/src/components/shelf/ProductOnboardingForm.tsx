@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 // ProductOnboardingForm — create or edit a `ShelfProduct` (plan 006, Phase B).
 //
@@ -23,16 +23,13 @@
 // while non-empty-but-invalid fields show a specific error. This avoids a red
 // error flash the moment the form mounts.
 
-import { useMemo, useState } from 'react';
-import {
-  type ProductInput,
-  type ShelfProduct,
-} from '@/lib/shelf';
-import { lamportsToSol, solToLamports } from '@/lib/format';
-import { extractErrorMessage } from '@/lib/format';
-import { Field } from '@/components/ui/Field';
-import { Button } from '@/components/ui/Button';
-import { ResultBanner } from '@/components/ui/ResultBanner';
+import { useMemo, useState } from "react";
+import { type ProductInput, type ShelfProduct } from "@/lib/shelf";
+import { lamportsToSol, solToLamports } from "@/lib/format";
+import { extractErrorMessage } from "@/lib/format";
+import { Field } from "@/components/ui/Field";
+import { Button } from "@/components/ui/Button";
+import { ResultBanner } from "@/components/ui/ResultBanner";
 
 export type ProductOnboardingFormProps = {
   /**
@@ -41,6 +38,14 @@ export type ProductOnboardingFormProps = {
    * lifetime — switching modes is the parent's job (it remounts the form).
    */
   initial?: ShelfProduct;
+  /**
+   * Prefill the barcode field in **create** mode (ignored when `initial` is
+   * set). Used by the `/scan` flow (plan 006 Phase C): an unknown code is
+   * scanned, then this form mounts with the code already filled in so the
+   * user can finish onboarding without retyping it. Edit mode ignores this —
+   * the barcode is the IndexedDB keyPath and is fixed once a product exists.
+   */
+  initialBarcode?: string;
   /**
    * Called with a validated {@link ProductInput} on submit. The parent owns
    * the actual `upsertProduct` call + list refresh so this component stays
@@ -58,6 +63,7 @@ export type ProductOnboardingFormProps = {
  */
 export function ProductOnboardingForm({
   initial,
+  initialBarcode,
   onSubmit,
   onCancel,
 }: ProductOnboardingFormProps) {
@@ -67,20 +73,24 @@ export function ProductOnboardingForm({
   // Field state. Inputs are strings (the source of truth); parsed numeric
   // values are derived via useMemo so validation and submit share one parse.
   // -----------------------------------------------------------------------
-  const [barcodeInput, setBarcodeInput] = useState(initial?.barcode ?? '');
-  const [name, setName] = useState(initial?.name ?? '');
-  const [brand, setBrand] = useState(initial?.brand ?? '');
+  // Create mode only: prefer an explicit `initialBarcode` (the /scan prefill)
+  // over a blank field. Edit mode ignores it (the barcode is fixed below).
+  const [barcodeInput, setBarcodeInput] = useState(
+    initial?.barcode ?? initialBarcode ?? ""
+  );
+  const [name, setName] = useState(initial?.name ?? "");
+  const [brand, setBrand] = useState(initial?.brand ?? "");
   const [packUnitsInput, setPackUnitsInput] = useState(
-    initial ? String(initial.packUnits) : '',
+    initial ? String(initial.packUnits) : ""
   );
   const [unitGramsInput, setUnitGramsInput] = useState(
-    initial ? String(initial.unitGrams) : '',
+    initial ? String(initial.unitGrams) : ""
   );
-  const [category, setCategory] = useState(initial?.category ?? '');
+  const [category, setCategory] = useState(initial?.category ?? "");
   const [defaultPriceInput, setDefaultPriceInput] = useState(
     initial?.defaultPriceLamports !== undefined
       ? lamportsToSol(initial.defaultPriceLamports)
-      : '',
+      : ""
   );
 
   // Submit-side state.
@@ -92,8 +102,14 @@ export function ProductOnboardingForm({
   // either because the field is empty (required-ness is enforced via
   // `canSubmit`, not via red text) or because it parses cleanly.
   // -----------------------------------------------------------------------
-  const packUnits = useMemo(() => parsePackUnits(packUnitsInput), [packUnitsInput]);
-  const unitGrams = useMemo(() => parseUnitGrams(unitGramsInput), [unitGramsInput]);
+  const packUnits = useMemo(
+    () => parsePackUnits(packUnitsInput),
+    [packUnitsInput]
+  );
+  const unitGrams = useMemo(
+    () => parseUnitGrams(unitGramsInput),
+    [unitGramsInput]
+  );
   const defaultPriceLamports = useMemo<bigint | undefined>(() => {
     const trimmed = defaultPriceInput.trim();
     if (trimmed.length === 0) return undefined;
@@ -105,24 +121,26 @@ export function ProductOnboardingForm({
     // Name is required, but we only surface an error once the user has typed
     // something (and then cleared it to whitespace) — empty-on-mount stays
     // calm. The disabled submit covers the "still empty" case.
-    if (name.trim().length === 0 && name.length > 0) return 'Enter a name';
+    if (name.trim().length === 0 && name.length > 0) return "Enter a name";
     return null;
   }, [name]);
 
   const packUnitsError = useMemo<string | null>(() => {
     if (packUnitsInput.trim().length === 0) return null;
-    return packUnits === null ? 'Enter a whole number of 1 or more' : null;
+    return packUnits === null ? "Enter a whole number of 1 or more" : null;
   }, [packUnitsInput, packUnits]);
 
   const unitGramsError = useMemo<string | null>(() => {
     if (unitGramsInput.trim().length === 0) return null;
-    return unitGrams === null ? 'Enter a weight greater than 0 (e.g. 500)' : null;
+    return unitGrams === null
+      ? "Enter a weight greater than 0 (e.g. 500)"
+      : null;
   }, [unitGramsInput, unitGrams]);
 
   const defaultPriceError = useMemo<string | null>(() => {
     if (defaultPriceInput.trim().length === 0) return null;
     return defaultPriceLamports === undefined
-      ? 'Enter a valid SOL amount (e.g. 0.05)'
+      ? "Enter a valid SOL amount (e.g. 0.05)"
       : null;
   }, [defaultPriceInput, defaultPriceLamports]);
 
@@ -146,7 +164,7 @@ export function ProductOnboardingForm({
     // value or fall back to a synthetic id so the shelf works with no camera.
     const barcode = isEdit
       ? initial!.barcode
-      : (barcodeInput.trim() || `manual-${generateId()}`);
+      : barcodeInput.trim() || `manual-${generateId()}`;
 
     const input: ProductInput = {
       barcode,
@@ -174,12 +192,12 @@ export function ProductOnboardingForm({
     <div className="flex flex-col gap-4 rounded-lg border border-slate-800 bg-slate-950/40 p-4">
       <div className="flex flex-col gap-0.5">
         <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-300">
-          {isEdit ? 'Edit product' : 'Add a product to your shelf'}
+          {isEdit ? "Edit product" : "Add a product to your shelf"}
         </h3>
         <p className="text-xs leading-relaxed text-slate-500">
           {isEdit
-            ? 'Update the details for this product. The barcode is fixed (it identifies the record).'
-            : 'Catalog an essential so the best-value engine can compare packs later. Name, pack size, and unit weight are required; everything else is optional.'}
+            ? "Update the details for this product. The barcode is fixed (it identifies the record)."
+            : "Catalog an essential so the best-value engine can compare packs later. Name, pack size, and unit weight are required; everything else is optional."}
         </p>
       </div>
 
@@ -289,8 +307,12 @@ export function ProductOnboardingForm({
         <Button variant="ghost" onClick={onCancel} disabled={submitting}>
           Cancel
         </Button>
-        <Button onClick={handleSubmit} loading={submitting} disabled={!canSubmit}>
-          {isEdit ? 'Save changes' : 'Add to shelf'}
+        <Button
+          onClick={handleSubmit}
+          loading={submitting}
+          disabled={!canSubmit}
+        >
+          {isEdit ? "Save changes" : "Add to shelf"}
         </Button>
       </div>
     </div>
@@ -350,8 +372,10 @@ function generateId(): string {
   // older context so the form degrades (falls back to a timestamp-based id)
   // rather than throwing on submit.
   const c = globalThis.crypto as Crypto | undefined;
-  if (c && typeof c.randomUUID === 'function') {
+  if (c && typeof c.randomUUID === "function") {
     return `manual-${c.randomUUID()}`;
   }
-  return `manual-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+  return `manual-${Date.now().toString(36)}-${Math.random()
+    .toString(36)
+    .slice(2, 8)}`;
 }

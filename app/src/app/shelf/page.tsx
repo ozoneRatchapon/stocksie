@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 // /shelf route — the off-chain household essentials catalog.
 //
@@ -42,7 +42,13 @@ export default function ShelfPage() {
             Shelf
           </h1>
           <p className="text-sm text-slate-400">
-            Your household essentials, saved on this device.
+            Your household essentials, saved on this device.{" "}
+            <Link
+              href="/scan"
+              className="font-medium text-emerald-400 transition-colors hover:text-emerald-300"
+            >
+              Or scan a barcode →
+            </Link>
           </p>
         </div>
         <WalletButton />
