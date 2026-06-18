@@ -175,19 +175,41 @@ Branch: `feature/offchain-inventory` off `develop` (gitflow). Trunk state was
 reconciled this session (`develop` fast-forwarded to `main` at `f957bef`).
 
 ### Phase A — Pure engine + data model (no UI, fully testable)
-- [ ] **A.1** Add deps: `idb` (^8.0), `html5-qrcode` (^2.3, deferred to Phase C
-  but add now to lock the version). Verify `@noble/hashes` already present (it
-  is — `hashes.ts` uses it).
-- [ ] **A.2** `lib/db.ts` — open `stocksie-shelf` v1, `products` store, migration
-  headroom (version-gated `upgrade()`). Guard against SSR (`typeof indexedDB`).
-- [ ] **A.3** `lib/shelf.ts` — CRUD over `db.ts`. Pure-ish: each fn calls `getDb()`.
-- [ ] **A.4** `lib/bestValue.ts` — `compareOffers()` pure impl + edge cases
-  (empty, single, ties, zero `unitGrams` → throw typed error, non-positive price
-  → throw).
-- [ ] **A.5** Unit tests for `bestValue.ts` in `app/src/lib/__tests__/bestValue.test.ts`
-  (or project test convention — check what exists; if no frontend test runner,
-  add `vitest` as devDep and wire a minimal config).
-- [ ] **A.6** Verify: `pnpm -C app typecheck` exit 0; bestValue tests green.
+- [x] **A.1** Add deps. **`idb ^8.0.3`** added (runtime). **`vitest ^4.1.9`**
+  added (devDep — no frontend test runner existed). **`html5-qrcode` deferred to
+  Phase C** (deviation from the original "add now to lock the version" — adding
+  an unused dep now would bloat `node_modules` and risk an unused-dep warning;
+  it lands with the scanner code that actually imports it). Confirmed
+  **`@noble/hashes` already present** (`hashes.ts` uses it) — no new hash dep.
+  Confirmed **`REWARD_COST_SAVING = 50n` already in `constants.ts`** — E.1 is
+  pre-done.
+- [x] **A.2** `lib/db.ts` — opens `stocksie-shelf` v1, `products` store keyed by
+  `barcode` with a `by-name` index, version-gated `upgrade()` for migration
+  headroom. SSR-safe (`typeof indexedDB === "undefined"` → rejects with a clear
+  message). Typed via `idb`'s `DBSchema`. 75 lines.
+- [x] **A.3** `lib/shelf.ts` — CRUD over `db.ts`: `getProduct`,
+  `findByBarcode`, `listProducts`, `upsertProduct` (preserves `createdAt`,
+  refreshes `updatedAt`), `deleteProduct`. 70 lines.
+- [x] **A.4** `lib/bestValue.ts` — `compareOffers()` pure impl. Edge cases
+  handled: empty → `BestValueError("empty")`; non-positive price / packUnits /
+  unitGrams → typed errors; non-finite unitGrams → typed error; single offer →
+  valid (rank 1, 0 savings); per-unit ties → lower absolute price, then stable
+  input order. **Refinement of §4.4:** to support fractional unit weights
+  (e.g. 12.5g) while keeping the ranking float-free, weights are scaled to
+  integer milligrams and ranked via bigint cross-products
+  (`a/b < c/d ⟺ a·d < c·b`). Float appears only in the display-only
+  `savingsPctVsBest`. 171 lines.
+- [x] **A.5** Unit tests co-located at `app/src/lib/bestValue.test.ts` (not
+  `__tests__/` — vitest's default glob picks up co-located `.test.ts` and it
+  reads better next to the module). Added `vitest.config.ts` (node env, minimal).
+  **10 tests**, all green: ranking (cheapest-first, bigger-pack, packUnits
+  multiply, tie-break-by-price, fractional grams, single offer) + validation
+  (empty, non-positive price/packUnits/unitGrams).
+- [x] **A.6** Verify: `pnpm -C app test` → **10/10 green**;
+  `pnpm -C app typecheck` → **exit 0**; `pnpm -C app build` → **exit 0,
+  byte-identical bundle** (main route still 70.8 kB / 259 kB — the new lib
+  modules + `idb` are unimported by any route and tree-shake out completely;
+  zero First Load bloat until Phase D wires them in). No Rust files touched.
 
 ### Phase B — Shelf DB UI + product onboarding (no camera yet)
 - [ ] **B.1** `components/shelf/ShelfList.tsx` — table/list of products, edit,
@@ -273,6 +295,7 @@ reconciled this session (`develop` fast-forwarded to `main` at `f957bef`).
 | Commit | Page Size | First Load JS | Delta | Notes |
 |---|---|---|---|---|
 | `f957bef` (baseline, post-reframe) | 70.8 kB | 259 kB | — | Plan 005 §4c landed. |
+| Phase A (engine + DB, unimported) | 70.8 kB | 259 kB | 0 / 0 | Byte-identical: the new lib modules + `idb` aren't imported by any route → tree-shaken out. |
 | _(Phase B/C/D…)_ | TBD | TBD | TBD | |
 
 Watch the scanner dep — `html5-qrcode` is the heaviest add; lazy-load it only on
@@ -281,19 +304,25 @@ flat.
 
 ## 8. Status
 
-**DRAFT — not started.** Awaiting PO approval of this plan before Phase A.
+**Phase A DONE** (pure engine + data model, on `feature/offchain-inventory`
+rebased onto `main` @ `d0961c3`). The `compareOffers()` ranking is pure, float-
+free (bigint cross-products on milligram-scaled weights), with 10 vitest tests
+green. `lib/db.ts` + `lib/shelf.ts` give a typed, SSR-safe IndexedDB shelf.
+`pnpm -C app test` → 10/10; `typecheck` → exit 0; `build` → exit 0,
+byte-identical bundle (zero First Load bloat — nothing imports the new modules
+yet). No Rust files touched. Q1 (test runner) resolved: vitest added.
 
-On approval, sequence is **A → B → D → E → C → F**, i.e. ship the pure engine +
-shelf + purchase-panel integration + reward trigger first (the honest Path B
-core that lets the landing badge come off), then layer the camera scanner (C) as
-a UX nicety, then tests/docs (F). C is deliberately last so the product works
-fully without any camera (manual barcode entry covers desktop and
-camera-less devices).
+Next: **Phase B → D → E** (shelf UI, purchase-panel integration, reward
+trigger), then **C** (camera scanner, last — so the product works fully without
+a camera), then **F** (tests/docs + drop the landing "Coming soon" badge).
+Phases B–E are unblocked; Q2–Q5 can be answered inline as they come up.
 
 ## 9. Open questions (need PO input before/during build)
 
-- **Q1 — Test runner.** Is there a frontend test runner already? If not, is
-  adding `vitest` acceptable? (Affects Phase A.5.)
+- **Q1 — Test runner.** ✅ **Resolved (Phase A):** no runner existed; added
+  `vitest ^4.1.9` as a devDep with a minimal `app/vitest.config.ts` (node env).
+  10 `bestValue` tests green. Convention: co-located `*.test.ts` next to the
+  module.
 - **Q2 — Shelf route vs tab.** Plan 005 Layer 3 (tabbed layout) is deferred. For
   now, is `/shelf` as a route acceptable, or should the shelf live behind a
   "Shelf" button on the Dashboard?
