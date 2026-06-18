@@ -191,6 +191,50 @@ landing is a read-only marketing surface; the operational UI is unchanged.
 - [x] **0.7** Conventional commit on `feature/web2-ux-landing`:
   `feat(ux): add a landing page (hero, hook, example) for first-time web2 users`.
 
+## 4c. Layer 0 — Landing copy reframe (Path A) (DONE)
+
+The initial landing (§4b) mis-framed the product. It led with the supporting
+mechanics — "Your household's money — shared, fair, and transparent" + the
+🏦 shared budget / 🛒 track purchases / 🎁 reward habits cards — which buried
+the PO's true headline: **household supply management + cheap-vs-expensive
+comparison + family sharing**. The landing also implicitly headlined the
+best-value feature, which is **not built** (only the on-chain `unit_cost_hash`
+hook + the reserved `REWARD_COST_SAVING` constant exist — see `docs/INSTRUCTIONS.md`
+§"Honest note"). Reframing the copy to lead with what's actually shipped, and
+to present best-value truthfully as "Coming soon", is **Path A** of the
+recommended Path C (A now → B next).
+
+Copy-only change to `Landing.tsx` (+67/−30). No logic, no state, no on-chain
+calls. Hook cards were reordered and `HookCard` gained an optional `badge`
+prop (rendered only for the "Coming soon" card).
+
+- [x] **C.1** Hero headline → **"Never run out — and never double-buy"**
+  (the core supply-management promise). Subtitle → "Your family's shared
+  list for household essentials. Everyone knows what's running low, what's
+  already bought, and what to grab next."
+- [x] **C.2** Hook cards reordered to the true headline, in priority order:
+  - 🛒 **Never run out** — flag what's running low (Last-One Tap + shopping
+    list — built).
+  - 👨‍👩‍👧 **Shared with the whole family** — one list, no double-buys
+    (built).
+  - 🧠 **Smart buying** — price-per-unit comparison, with a `badge="Coming
+    soon"` pill. Body: "On the roadmap — the groundwork is already
+    on-chain." Honest about the gap; no overclaim.
+- [x] **C.3** Example scenario (Lee household) reframed around **supply
+  management** as the through-line, with reimbursement/reward kept as
+  natural supporting steps (they are real built features, just not the
+  headline): Grandma flags detergent low → Alex checks → Dad already
+  grabbed one (no double-buy) → Mom approves restock → Alex buys, shared
+  pot pays back → everyone sees what's stocked and what's next.
+- [x] **C.4** File-level JSDoc updated: hook section mapping changed from
+  "budget / purchases / rewards" → "supply tracking, family sharing, and
+  smart buying (comparison engine on the roadmap)".
+- [x] **C.5** Verify: `pnpm -C app typecheck` (`tsc --noEmit`) → exit 0;
+  `pnpm -C app build` → exit 0 (main route **70.8 kB / 259 kB First Load
+  JS**, +0.2 kB page vs. §4b's 70.6 — the reframed copy + the `badge`
+  element).
+- [x] **C.6** Conventional commit (this change).
+
 ## 5. Layer 2 — Visual & layout warmth (DEFERRED)
 
 Not started. Pending Layer 1 review.
@@ -284,6 +328,19 @@ Not started. Pending Layers 1 + 2 review.
 - No `lib/`, `hooks/`, `adapters/`, or Rust files touched. Landing is read-only
   (no on-chain calls); the operational UI is unchanged.
 
+### Landing reframe (Path A)
+- `pnpm -C app typecheck` (`tsc --noEmit`) → **exit 0**.
+- `pnpm -C app build` → **exit 0** (main route **70.8 kB / 259 kB First Load
+  JS**, +0.2 kB page vs. §4b's 70.6 — reframed copy + the `HookCard` `badge`
+  element).
+- `git diff --stat HEAD` → **1 file changed, +67/−30**
+  (`app/src/components/Landing.tsx` only). No `lib/`, `hooks/`, `adapters`,
+  or Rust files touched.
+- Honesty audit: the best-value engine is presented exclusively via the
+  "Smart buying" card with a `badge="Coming soon"` pill and body copy
+  "On the roadmap — the groundwork is already on-chain." No claim of a
+  working comparison feature anywhere in user-visible copy.
+
 ## 9. Status
 
 **Layer 1 complete, committed, and reviewed.** All vocabulary rewrites +
@@ -292,14 +349,20 @@ the wallet-button labels override (§1.10a) are on `feature/web2-ux`
 `cargo check`, and `cargo clippy --all-targets` all exit 0. No logic changes —
 copy + presentation only.
 
-**Layer 0 (orientation / landing) now ACTIVE — prioritised ahead of Layers 2
-and 3.** Raised in the Layer 1 review: the app has no front door, so a new
-web2 user lands in a wall of forms with no idea what Stocksie is or why
-they'd use it. A landing page (hero → hook → example → enter) is the
-single highest-impact change for web2 adoption, and it reframes Layers 2/3
-from "make the scary thing pretty" into "make the destination the hero
-pointed to feel like home." Building on `feature/web2-ux-landing` off
-`feature/web2-ux`.
+**Layer 0 (orientation / landing) — initial build + Path A reframe both
+DONE.** The landing shipped (§4b) and was then reframed (§4c) to lead with
+the product's true headline (supply management + family sharing), with the
+best-value comparison shown truthfully as "Coming soon" rather than
+overclaimed. The landing is now semantically aligned with the PO's vision
+and honest about the best-value gap. Copy-only on `main` (commits `deeb6e8`
++ this reframe).
 
-Layers 2 (visual warmth) and 3 (guided flow) remain deferred until Layer 0
-is reviewed.
+**Path B (best-value engine) is the recommended NEXT feature.** Builds the
+off-chain price-per-unit comparison, surfaces it in the purchase flow (the
+`unit_cost_hash` capture points already exist), and wires the reserved
+`REWARD_COST_SAVING` (50 pts) to a real handler. Will let the "Smart
+buying" card drop its "Coming soon" badge and become the headline feature.
+Scope as a new plan (e.g. `006_best_value_engine.md`).
+
+Layers 2 (visual warmth) and 3 (guided flow) remain deferred — pick up
+after Path B or in parallel, PO's call.

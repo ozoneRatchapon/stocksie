@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 // Landing — the Stocksie "front door" for first-time web2 users.
 //
@@ -9,8 +9,9 @@
 //
 // Four sections, in reading order:
 //   1. Hero       — one-line value prop + the primary "Get started" CTA.
-//   2. Hook       — three "what Stocksie helps with" cards, each mapped to a
-//                   real instruction family (budget / purchases / rewards).
+//   2. Hook       — three "what Stocksie helps with" cards, mapped to the
+//                   product's true headline: supply tracking, family sharing,
+//                   and smart buying (the comparison engine is on the roadmap).
 //   3. Example    — a concrete worked scenario (the Lee household) that turns
 //                   the abstract product into something tangible.
 //   4. Final CTA  — a second entry point for users who scrolled to the bottom.
@@ -44,12 +45,13 @@ export function Landing() {
       {/* --------------------------------------------------------------- */}
       <section className="mt-16 text-center">
         <h1 className="mx-auto max-w-3xl text-balance text-4xl font-bold tracking-tight text-slate-50 sm:text-5xl">
-          Your household&rsquo;s money —{" "}
-          <span className="text-emerald-400">shared, fair, and transparent</span>
+          Never run out —{" "}
+          <span className="text-emerald-400">and never double-buy</span>
         </h1>
         <p className="mx-auto mt-5 max-w-2xl text-pretty text-lg text-slate-400">
-          Track shared spending, pay each other back, and reward good habits.
-          No spreadsheets, no awkward &ldquo;who owes who&rdquo; texts.
+          Your family&rsquo;s shared list for household essentials. Everyone
+          knows what&rsquo;s running low, what&rsquo;s already bought, and what
+          to grab next.
         </p>
         <div className="mt-8 flex flex-col items-center gap-3">
           <button
@@ -75,19 +77,20 @@ export function Landing() {
         </h2>
         <div className="mt-8 grid gap-5 sm:grid-cols-3">
           <HookCard
-            icon="🏦"
-            title="One shared budget"
-            body="Everyone chips in. See the balance at a glance. Admins can top it up or move money back to their own account."
-          />
-          <HookCard
             icon="🛒"
-            title="Track what you buy"
-            body="Anyone can report &ldquo;we need this&rdquo; or &ldquo;I just bought this.&rdquo; An admin approves. No more mystery spending."
+            title="Never run out"
+            body="Spot what&rsquo;s running low and flag it in seconds. The whole household sees which essentials need restocking — before someone buys the third bottle of dish soap this week."
           />
           <HookCard
-            icon="🎁"
-            title="Reward good habits"
-            body="Admins award points for staying stocked and on budget. A little recognition keeps everyone motivated."
+            icon="👨‍👩‍👧"
+            title="Shared with the whole family"
+            body="One list, everyone on it. No more &ldquo;I thought you bought it&rdquo; or the same item twice filling up the cupboard. Grandma, the teens, everyone stays in sync."
+          />
+          <HookCard
+            icon="🧠"
+            title="Smart buying"
+            badge="Coming soon"
+            body="A price-per-unit comparison that tells you which pack size is actually cheaper. On the roadmap — the groundwork is already on-chain."
           />
         </div>
       </section>
@@ -116,7 +119,8 @@ export function Landing() {
               n={1}
               body={
                 <>
-                  Mom <strong className="text-slate-200">sets up Stocksie</strong>{" "}
+                  Mom{" "}
+                  <strong className="text-slate-200">sets up Stocksie</strong>{" "}
                   and invites the family.
                 </>
               }
@@ -125,8 +129,9 @@ export function Landing() {
               n={2}
               body={
                 <>
-                  She <strong className="text-slate-200">adds money</strong> to
-                  the shared budget. 💰
+                  Grandma notices the laundry detergent is almost empty and{" "}
+                  <strong className="text-slate-200">flags it</strong> on the
+                  shared list. 🧴
                 </>
               }
             />
@@ -134,19 +139,33 @@ export function Landing() {
               n={3}
               body={
                 <>
-                  Alex spots they&rsquo;re low on groceries and{" "}
-                  <strong className="text-slate-200">reports it</strong>. 🛒
+                  Alex checks — turns out Dad{" "}
+                  <strong className="text-slate-200">
+                    already grabbed one
+                  </strong>{" "}
+                  yesterday. No double-buy. ✅
                 </>
               }
             />
-            <Step n={4} body={<>Mom <strong className="text-slate-200">approves</strong>. ✅</>} />
+            <Step
+              n={4}
+              body={
+                <>
+                  Mom adds it to the list and{" "}
+                  <strong className="text-slate-200">
+                    approves the restock
+                  </strong>
+                  . 🛒
+                </>
+              }
+            />
             <Step
               n={5}
               body={
                 <>
-                  Alex buys the groceries and files the receipt. Stocksie{" "}
-                  <strong className="text-slate-200">pays Alex back</strong>{" "}
-                  from the shared pot — instantly, exactly. 💸
+                  Alex buys it and marks it done. The shared pot{" "}
+                  <strong className="text-slate-200">pays Alex back</strong> —
+                  no &ldquo;who owes who.&rdquo; 💸
                 </>
               }
             />
@@ -154,16 +173,19 @@ export function Landing() {
               n={6}
               body={
                 <>
-                  Alex earns <strong className="text-slate-200">reward points</strong>{" "}
-                  for staying on top of it. 🎁
+                  Everyone sees{" "}
+                  <strong className="text-slate-200">
+                    what&rsquo;s stocked and what&rsquo;s next
+                  </strong>{" "}
+                  — at a glance. 📋
                 </>
               }
             />
           </ol>
 
           <p className="mt-8 text-center text-sm text-slate-400">
-            Everyone sees where the money went. No spreadsheets. No
-            &ldquo;who owes who&rdquo; texts.
+            The cupboard stays stocked. The money stays fair. No spreadsheets.
+            No &ldquo;who owes who&rdquo; texts.
           </p>
         </div>
       </section>
@@ -196,7 +218,17 @@ export function Landing() {
 }
 
 /** One of the three "what it helps with" cards. */
-function HookCard({ icon, title, body }: { icon: string; title: string; body: string }) {
+function HookCard({
+  icon,
+  title,
+  body,
+  badge,
+}: {
+  icon: string;
+  title: string;
+  body: string;
+  badge?: string;
+}) {
   return (
     <div className="rounded-2xl border border-slate-800 bg-slate-900/40 p-6">
       <div className="text-3xl" aria-hidden="true">
@@ -204,6 +236,11 @@ function HookCard({ icon, title, body }: { icon: string; title: string; body: st
       </div>
       <h3 className="mt-4 text-lg font-semibold text-slate-100">{title}</h3>
       <p className="mt-2 text-sm leading-relaxed text-slate-400">{body}</p>
+      {badge ? (
+        <span className="mt-4 inline-flex items-center rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-0.5 text-xs font-medium text-emerald-300">
+          {badge}
+        </span>
+      ) : null}
     </div>
   );
 }
