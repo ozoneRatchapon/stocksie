@@ -271,17 +271,30 @@ reconciled this session (`develop` fast-forwarded to `main` at `f957bef`).
   the structured per-unit data lives only in `pendingSnapshots` (client memory).
 
 ### Phase E — `REWARD_COST_SAVING` trigger
-- [ ] **E.1** Confirm `REWARD_COST_SAVING` exists in `app/src/lib/constants.ts`;
-  add if missing (mirror Rust value 50).
-- [ ] **E.2** After a successful `confirm_restock`, in the observer's client:
-  compute `saving = snapshotPerUnit - actualPerUnit`. If `> 0`, fire
-  `award_reward(buyerMember, REWARD_COST_SAVING, reasonHash)` using the existing
-  `useTransaction` hook.
-- [ ] **E.3** UX copy: surface "Smart saving — buyer earned 50 pts" via the
-  existing `ResultBanner`.
-- [ ] **E.4** Verify: end-to-end on localnet (Surfpool) — create with snapshot,
-  approve, confirm with a cheaper actual, observe `RewardEarned` event with
-  `REWARD_COST_SAVING` + balance delta.
+- [x] **E.1** `REWARD_COST_SAVING = 50n` already in `app/src/lib/constants.ts`
+  (mirrors the Rust `REWARD_COST_SAVING` constant); no addition needed.
+- [x] **E.2** `CostSavingRewardForm` in `PurchasePanel.tsx` reads
+  `getSnapshot(requestId)`, runs `computeCostSaving`, and if `isSaving` fires
+  `award_reward(buyerWallet, REWARD_COST_SAVING, reasonHash)` via `useTransaction`.
+  Account shape mirrors `AwardRewardForm` (`household`/`callerMember`/
+  `targetMember`/`caller`); `reasonHash = toHash32(costSavingReasonText(...))`.
+  On success it calls `clearSnapshot(requestId)` so the same saving can't be
+  rewarded twice (the on-chain signature + reason hash is the audit trail).
+- [x] **E.3** `CostSavingHint` surfaces "Smart saving detected … Award them 50
+  points" pre-submit and "Done — the buyer earned 50 cost-saving reward points"
+  post-award (the post-award branch is needed because `clearSnapshot` makes the
+  `saving` memo recompute to `null`). Falls back to a calm "no comparison data
+  on this device" message when the snapshot is missing (Q4 graceful
+  degradation).
+- [x] **E.4** Code-verified against the on-chain IDL/Rust
+  (`award_reward(member_wallet: Pubkey, points: u64, reason_hash: [u8;32])`,
+  gated by `can_award_rewards()` = Owner/Parent in
+  `programs/stocksie/src/instructions/rewards.rs`). Automated gates green:
+  `typecheck` exit 0, `vitest` 26/26 (incl. 10 `costSaving` tests), `build` exit
+  0. **Live localnet e2e (Surfpool browser flow) is a manual step not executed
+  here** — it requires create-with-snapshot → approve → confirm-with-cheaper-
+  actual → observe `RewardEarned` with `REWARD_COST_SAVING`. Documented as the
+  Phase F handoff item; no code change is expected to be needed for it.
 
 ### Phase F — Tests, docs, landing badge
 - [ ] **F.1** bestValue unit tests (A.5) green; add a Shelf DB integration test
@@ -314,6 +327,7 @@ reconciled this session (`develop` fast-forwarded to `main` at `f957bef`).
 | Phase A (engine + DB, unimported) | 70.8 kB | 259 kB | 0 / 0 | Byte-identical: the new lib modules + `idb` aren't imported by any route → tree-shaken out. |
 | Phase B (shelf UI) | 67.4 kB | 264 kB | −3.4 / +5 | `/` route: small First Load bump from the Dashboard "Shelf" link (chunk reorg). New `/shelf` route is 117 kB First Load — lean, since it doesn't pull Solana/wallet-adapter into its own chunk. |
 | Phase D (best-value modal) | 70.8 kB | 269 kB | +3.4 / +5 | `/` route: +5 kB First Load for `BestValueModal` + `Modal` primitive + `pendingSnapshots` (now imported by PurchasePanel). `/shelf` unchanged at 117 kB. |
+| Phase E (cost-saving trigger) | 71.7 kB | 270 kB | +0.9 / +1 | `/` route: +1 kB First Load for `CostSavingRewardForm` + `CostSavingHint` + the pure `costSaving` module (all imported by PurchasePanel). `/shelf` unchanged at 117 kB (Phase E touches no shelf code). |
 
 Watch the scanner dep — `html5-qrcode` is the heaviest add; lazy-load it only on
 `/scan` (dynamic import, `ssr: false`) to keep the landing/dashboard First Load
@@ -321,23 +335,30 @@ flat.
 
 ## 8. Status
 
-**Phases A + B + D DONE** (on `feature/offchain-inventory`). Phase A: pure
+**Phases A + B + D + E DONE** (on `feature/offchain-inventory`). Phase A: pure
 `compareOffers()` engine (float-free bigint cross-products on milligram-scaled
 weights) + typed SSR-safe IndexedDB shelf (`db.ts`, `shelf.ts`). Phase B: shelf
 catalog UI (`ShelfList` + `ProductOnboardingForm`) at the `/shelf` route.
 Phase D: best-value compare modal (`BestValueModal` on a new `Modal` primitive)
 wired into both the create and restock forms, with an in-memory
 `pendingSnapshots` store (D.3) carrying the cleartext per-unit data that Phase E
-will score — structured data stays client-side; only blake3 hashes go on-chain.
-No Rust files touched. Gates: `typecheck` → exit 0; `build` → exit 0 (`/` 269 kB
-First Load); `vitest` → 16/16 (10 bestValue + 6 pendingSnapshots). Q1 (test
-runner) + Q2 (route vs tab → route) resolved.
+scores — structured data stays client-side; only blake3 hashes go on-chain.
+Phase E: `computeCostSaving` (pure, 10 tests) + `CostSavingRewardForm` in
+PurchasePanel — Owner/Parent reads the snapshot for a request, and if the
+buyer beat the benchmark, fires the EXISTING `award_reward` for
+`REWARD_COST_SAVING` (50 pts), then clears the snapshot to prevent double-award.
+No Rust files touched. Gates: `typecheck` → exit 0; `build` → exit 0 (`/` 270 kB
+First Load, `/shelf` 117 kB); `vitest` → 26/26 (10 bestValue + 6 pendingSnapshots
++ 10 costSaving). Q1 (test runner) + Q2 (route vs tab → route) + Q3 (Owner/Parent
+gate accepted as MVP — buyer cannot self-claim) resolved.
 
-Next: **Phase E → C → F** (the `REWARD_COST_SAVING` trigger — D.3 left the
-seam; now the observer's client reads `pendingSnapshots` after restock and
-fires the existing `award_reward`), then **C** (camera scanner, last — so the product
-works fully without a camera), then **F** (tests/docs + drop the landing
-"Coming soon" badge). Phase E is unblocked; Q3–Q5 can be answered inline.
+Next: **C → F**. **Phase C** (camera scanner, deliberately last — so the product
+works fully without a camera: `html5-qrcode` dynamic-imported with `ssr:false` on
+a `/scan` route, fallback to manual entry). Then **Phase F** (privacy re-audit,
+drop the landing "Coming soon" badge, refresh docs/roadmap, manual localnet e2e
+for E.4). Q4 (per-device in-memory snapshots accepted for MVP, clean seam to
+swap to IndexedDB) + Q5 (`html5-qrcode` default, confirm at C kickoff) to be
+resolved inline.
 
 ## 9. Open questions (need PO input before/during build)
 

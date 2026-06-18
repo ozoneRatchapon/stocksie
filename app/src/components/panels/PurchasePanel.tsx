@@ -38,6 +38,7 @@ import { solToLamports } from "@/lib/format";
 import {
   MIN_REQUEST_LAMPORTS,
   MAX_REIMBURSEMENT_LAMPORTS,
+  REWARD_COST_SAVING,
 } from "@/lib/constants";
 import { Panel, SubPanel } from "@/components/ui/Panel";
 import { Field } from "@/components/ui/Field";
@@ -49,10 +50,13 @@ import {
   type BestValueChoice,
 } from "@/components/BestValueModal";
 import {
+  clearSnapshot,
+  getSnapshot,
   setActual,
   setBenchmark,
   type SnapshotSide,
 } from "@/lib/pendingSnapshots";
+import { computeCostSaving, costSavingReasonText } from "@/lib/costSaving";
 
 export function PurchasePanel() {
   return (
@@ -65,6 +69,7 @@ export function PurchasePanel() {
         <ApproveForm />
         <RejectForm />
         <ConfirmRestockForm />
+        <CostSavingRewardForm />
         <CloseForm />
       </ConnectGate>
     </Panel>
@@ -666,6 +671,256 @@ function ConfirmRestockForm() {
         }}
       />
     </SubPanel>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// cost-saving reward (Owner/Parent; fires the existing `award_reward`)
+// ---------------------------------------------------------------------------
+
+// CostSavingRewardForm — the payoff of the best-value feature (plan 006, Phase E).
+//
+// The on-chain program can't tell whether the buyer beat the "best-value
+// snapshot" they were benchmarked against — it only stores a blake3 hash. So an
+// Owner/Parent (whoever is online and authorized to grant rewards) reads the
+// client-side cleartext snapshot for a request, and if the buyer paid less per
+// unit than the benchmark, fires the EXISTING `award_reward` instruction for
+// REWARD_COST_SAVING (50 pts). No Rust change is needed.
+//
+// This is the Owner/Parent-gated path (Q3): the buyer cannot self-trigger the
+// reward because `award_reward` requires the Owner/Parent role. In the
+// reference UI's happy path (single-browser localnet, one person playing the
+// roles), the in-memory snapshot has both sides after create + restock, so the
+// saving is detected here. On a different browser, or after a reload, the
+// snapshot is gone — the form says so and points at the manual award in
+// Rewards. That graceful degradation is the documented Q4 limitation.
+function CostSavingRewardForm() {
+  const program = useProgram();
+  const { household, connectedWallet, callerMember, isOwnerConnected } =
+    useHouseholdContext();
+  const tx = useTransaction();
+  const [requestIdInput, setRequestIdInput] = useState("");
+  const [buyerInput, setBuyerInput] = useState("");
+  // The request id most recently awarded in this session. Set on success so the
+  // hint can show a confirmation instead of the (now-cleared) snapshot's
+  // "no comparison data" state. Cleared when the user moves to a different request.
+  const [awardedId, setAwardedId] = useState<bigint | null>(null);
+
+  const requestId = useMemo(
+    () => tryParseUint64(requestIdInput),
+    [requestIdInput]
+  );
+  const requestIdError = useMemo(() => {
+    if (requestIdInput.trim().length === 0) return null;
+    return requestId === null ? "Enter a non-negative integer" : null;
+  }, [requestIdInput, requestId]);
+
+  const buyerWallet = useMemo(
+    () => tryParsePublicKey(buyerInput),
+    [buyerInput]
+  );
+  const buyerError = useMemo(() => {
+    if (buyerInput.trim().length === 0) return null;
+    return buyerWallet ? null : "Invalid Solana address";
+  }, [buyerInput, buyerWallet]);
+
+  // Read the client-side snapshot (if any) for this request and score it. This
+  // is the off-chain comparison the chain can't do. `null` means either side is
+  // missing (freehand entry, different browser, or reload) → nothing to score.
+  const saving = useMemo(() => {
+    if (requestId === null) return null;
+    const snapshot = getSnapshot(requestId);
+    if (!snapshot) return null;
+    return computeCostSaving(snapshot);
+  }, [requestId, tx.nonce]);
+
+  const canSubmit =
+    !!program &&
+    !!household &&
+    !!connectedWallet &&
+    !!callerMember &&
+    !!buyerWallet &&
+    requestId !== null &&
+    saving !== null &&
+    saving.isSaving &&
+    !requestIdError &&
+    !buyerError &&
+    !tx.pending;
+
+  const handleSubmit = () => {
+    if (
+      !program ||
+      !household ||
+      !connectedWallet ||
+      !callerMember ||
+      !buyerWallet ||
+      requestId === null ||
+      !saving ||
+      !saving.isSaving
+    ) {
+      return;
+    }
+    const targetMember = memberPda(household, buyerWallet);
+    const reasonHash = toHash32(
+      costSavingReasonText(requestId, saving.savingPerUnitLamports)
+    );
+    // Capture the id so we can clear the snapshot after success (prevents a
+    // double-award for the same saving).
+    const awardedRequestId = requestId;
+    void tx.submit(async () => {
+      // award_reward(member_wallet, points, reason_hash): the buyer receives
+      // REWARD_COST_SAVING pts for beating the benchmark. The caller (this
+      // Owner/Parent) authorizes it. Account shape mirrors AwardRewardForm.
+      const signature = await program.methods
+        .awardReward(
+          buyerWallet,
+          new BN(REWARD_COST_SAVING.toString()),
+          reasonHash
+        )
+        .accountsStrict({
+          household,
+          callerMember,
+          targetMember,
+          caller: connectedWallet,
+        })
+        .rpc();
+      // Drop the client-side snapshot so the same saving can't be rewarded
+      // twice. The on-chain record (signature + reason hash) is the audit trail.
+      clearSnapshot(awardedRequestId);
+      setAwardedId(awardedRequestId);
+      return signature;
+    });
+  };
+
+  // Owner/Parent gate — same conservative proxy + UX guard as AwardRewardForm.
+  if (!isOwnerConnected) {
+    return (
+      <SubPanel
+        label="Award a cost-saving reward"
+        hint="Admin or approver. When a buyer beats the best-value snapshot, the admin (or an approver) awards them 50 reward points. Sign in as the household admin (or set the admin address above to your account) to do this."
+      >
+        <p className="rounded-lg border border-dashed border-slate-700 bg-slate-950/30 px-4 py-3 text-xs text-slate-400">
+          You're not signed in as this household's admin. Cost-saving rewards
+          are admin-only in this reference UI; the on-chain gate also admits the
+          Parent role.
+        </p>
+      </SubPanel>
+    );
+  }
+
+  return (
+    <SubPanel
+      label="Award a cost-saving reward"
+      hint="Admin or approver. If a buyer bought the item cheaper per unit than the best-value snapshot they were benchmarked against, award them 50 reward points for the smart buy. The comparison runs off-chain — only a scrambled fingerprint of the reason is recorded."
+    >
+      <div className="grid gap-3 sm:grid-cols-[1fr_2fr_auto]">
+        <Field
+          label="Request #"
+          value={requestIdInput}
+          onChange={setRequestIdInput}
+          placeholder="e.g. 1"
+          mono
+          error={requestIdError}
+          onSubmit={handleSubmit}
+          helpText="The request the buyer restocked."
+        />
+        <Field
+          label="Buyer's address"
+          value={buyerInput}
+          onChange={setBuyerInput}
+          placeholder="Their wallet address"
+          mono
+          error={buyerError}
+          onSubmit={handleSubmit}
+          helpText="The member who bought it — they receive the points."
+        />
+        <div className="flex items-end">
+          <Button
+            onClick={handleSubmit}
+            loading={tx.pending}
+            disabled={!canSubmit}
+          >
+            Award {REWARD_COST_SAVING.toString()} pts
+          </Button>
+        </div>
+      </div>
+
+      {/* Outcome of the off-chain comparison. Drives what the user can do next. */}
+      <CostSavingHint
+        requestId={requestId}
+        awardedId={awardedId}
+        saving={saving}
+        pending={tx.pending}
+      />
+
+      <ResultBanner
+        pending={tx.pending}
+        signature={tx.signature}
+        error={tx.error}
+        onDismiss={tx.reset}
+      />
+    </SubPanel>
+  );
+}
+
+/**
+ * Explain the off-chain comparison result: a detected saving (with the award
+ * enabled), a non-saving, or no comparison data at all. Pure presentational.
+ */
+function CostSavingHint({
+  requestId,
+  awardedId,
+  saving,
+  pending,
+}: {
+  requestId: bigint | null;
+  awardedId: bigint | null;
+  saving: { isSaving: boolean; savingPerUnitLamports: bigint } | null;
+  pending: boolean;
+}) {
+  // Nothing typed yet — stay quiet (calm UX, mirrors the field-error convention).
+  if (requestId === null) return null;
+
+  // Just awarded this request in this session — confirm it (the snapshot has
+  // been consumed, so `saving` will have recomputed to null; surface success
+  // rather than the generic "no data" message).
+  if (awardedId !== null && awardedId === requestId) {
+    return (
+      <p className="rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-xs text-emerald-200">
+        Done — the buyer earned {REWARD_COST_SAVING.toString()} cost-saving
+        reward points. The on-chain receipt above is the audit trail.
+      </p>
+    );
+  }
+
+  if (saving === null) {
+    return (
+      <p className="rounded-lg border border-dashed border-slate-700 bg-slate-950/30 px-4 py-3 text-xs text-slate-400">
+        No comparison data for this request on this device. That happens when
+        the snapshot or the actual cost was typed by hand (not set via “Compare
+        prices”), when this is a different browser than the one that recorded
+        it, or after a reload. You can still award points manually in Rewards.
+      </p>
+    );
+  }
+
+  if (saving.isSaving) {
+    return (
+      <p className="rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-xs text-emerald-200">
+        {pending
+          ? "Awarding the cost-saving reward…"
+          : `Smart saving detected — the buyer paid less per unit than the snapshot benchmark (saving ${
+              saving.savingPerUnitLamports
+            } lamports/g). Award them ${REWARD_COST_SAVING.toString()} points.`}
+      </p>
+    );
+  }
+
+  return (
+    <p className="rounded-lg border border-dashed border-slate-700 bg-slate-950/30 px-4 py-3 text-xs text-slate-400">
+      No saving on this request — the buyer didn't beat the best-value snapshot,
+      so no cost-saving reward is due.
+    </p>
   );
 }
 
