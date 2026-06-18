@@ -44,6 +44,15 @@ import { Field } from "@/components/ui/Field";
 import { Button } from "@/components/ui/Button";
 import { ResultBanner } from "@/components/ui/ResultBanner";
 import { ConnectGate } from "@/components/ui/ConnectGate";
+import {
+  BestValueModal,
+  type BestValueChoice,
+} from "@/components/BestValueModal";
+import {
+  setActual,
+  setBenchmark,
+  type SnapshotSide,
+} from "@/lib/pendingSnapshots";
 
 export function PurchasePanel() {
   return (
@@ -74,6 +83,12 @@ function CreateForm() {
   const [itemInput, setItemInput] = useState("");
   const [unitCostInput, setUnitCostInput] = useState("");
   const [buyerInput, setBuyerInput] = useState("");
+  // Best-value compare modal (plan 006 D.2). When the user picks an offer, its
+  // text back-fills `unitCostInput` (hashed on-chain unchanged) and its
+  // structured per-unit data is stashed here so it can be persisted against
+  // the new request id once the create tx confirms (D.3).
+  const [compareOpen, setCompareOpen] = useState(false);
+  const [benchmarkSide, setBenchmarkSide] = useState<SnapshotSide | null>(null);
 
   const amountLamports = useMemo(
     () => solToLamports(amountInput),
@@ -132,6 +147,11 @@ function CreateForm() {
     const buyerMember = memberPda(household, buyerWallet);
     const itemHash = toHash32(itemInput);
     const unitCostHash = toHash32(unitCostInput);
+    // Capture the benchmark snapshot chosen via the compare modal so it can be
+    // persisted against the new request id AFTER the create confirms (the id
+    // is only known then). A local copy avoids the closure going stale if the
+    // user opens the compare modal again mid-submit.
+    const benchmark = benchmarkSide;
     void tx.submit(async () => {
       // The request PDA uses `request_counter + 1` — the *next* id, which the
       // handler commits via Household::next_request_id. Reading the household
@@ -140,7 +160,7 @@ function CreateForm() {
       const householdAccount = await program.account.household.fetch(household);
       const nextId = BigInt(householdAccount.requestCounter.toString(10)) + 1n;
       const request = purchasePda(household, nextId);
-      return program.methods
+      const signature = await program.methods
         .createPurchaseRequest(
           new BN(amountLamports.toString()),
           itemHash,
@@ -156,6 +176,12 @@ function CreateForm() {
           systemProgram: SYSTEM_PROGRAM_ID,
         })
         .rpc();
+      // After the request is created, persist the benchmark offer's cleartext
+      // per-unit data keyed by the new request id, so Phase E can score a
+      // cost-saving once the buyer restocks. No-op if the snapshot was typed
+      // freehand (no compare) — graceful, the auto-reward just won't fire.
+      if (benchmark) setBenchmark(nextId, benchmark);
+      return signature;
     });
   };
 
@@ -200,26 +226,57 @@ function CreateForm() {
         <Field
           label="Best-value snapshot"
           value={unitCostInput}
-          onChange={setUnitCostInput}
+          onChange={(v) => {
+            setUnitCostInput(v);
+            // Manual edit after a compare choice: the structured benchmark no
+            // longer matches the text, so drop it (the scoring will simply not
+            // fire for this request — graceful).
+            if (benchmarkSide) setBenchmarkSide(null);
+          }}
           placeholder='e.g. "Lowest unit price at store X"'
           helpText="🔒 Private — used later to score cost-savings."
           onSubmit={handleSubmit}
         />
       </div>
-      <div className="flex items-center gap-3">
-        <Button
-          onClick={handleSubmit}
-          loading={tx.pending}
-          disabled={!canSubmit}
-        >
-          Open request
-        </Button>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <Button
+            onClick={handleSubmit}
+            loading={tx.pending}
+            disabled={!canSubmit}
+          >
+            Open request
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setCompareOpen(true)}
+          >
+            <span aria-hidden="true">⚖</span>
+            Compare prices
+          </Button>
+        </div>
       </div>
       <ResultBanner
         pending={tx.pending}
         signature={tx.signature}
         error={tx.error}
         onDismiss={tx.reset}
+      />
+      <BestValueModal
+        open={compareOpen}
+        onClose={() => setCompareOpen(false)}
+        onChoose={(choice: BestValueChoice) => {
+          setUnitCostInput(choice.text);
+          setBenchmarkSide({
+            priceLamports: choice.priceLamports,
+            perUnitLamports: choice.perUnitLamports,
+            label: choice.label,
+            packUnits: choice.packUnits,
+            unitGrams: choice.unitGrams,
+          });
+          setCompareOpen(false);
+        }}
       />
     </SubPanel>
   );
@@ -277,7 +334,8 @@ function useRequestIdInput() {
 
 function ApproveForm() {
   const program = useProgram();
-  const { household, connectedWallet, isOwnerConnected } = useHouseholdContext();
+  const { household, connectedWallet, isOwnerConnected } =
+    useHouseholdContext();
   const tx = useTransaction();
   const { requestIdInput, setRequestIdInput, requestId, requestIdError } =
     useRequestIdInput();
@@ -367,7 +425,8 @@ function ApproveForm() {
 
 function RejectForm() {
   const program = useProgram();
-  const { household, connectedWallet, isOwnerConnected } = useHouseholdContext();
+  const { household, connectedWallet, isOwnerConnected } =
+    useHouseholdContext();
   const tx = useTransaction();
   const { requestIdInput, setRequestIdInput, requestId, requestIdError } =
     useRequestIdInput();
@@ -476,6 +535,12 @@ function ConfirmRestockForm() {
     useRequestIdInput();
   const [buyerInput, setBuyerInput] = useState("");
   const [unitCostInput, setUnitCostInput] = useState("");
+  // Best-value compare modal (plan 006 D.2/D.3 — the restock side). The chosen
+  // offer's actual per-unit data is persisted against `requestId` after the
+  // restock confirms, so Phase E can score it against the create-time
+  // benchmark. `requestId` is known up-front here (the user types it).
+  const [compareOpen, setCompareOpen] = useState(false);
+  const [actualSide, setActualSide] = useState<SnapshotSide | null>(null);
 
   const buyerWallet = useMemo(
     () => tryParsePublicKey(buyerInput),
@@ -502,10 +567,13 @@ function ConfirmRestockForm() {
     const buyerMember = memberPda(household, buyerWallet);
     const request = purchasePda(household, requestId);
     const unitCostHash = toHash32(unitCostInput);
+    // Capture the actual snapshot chosen via the compare modal so it can be
+    // persisted against this request id once the restock confirms.
+    const actual = actualSide;
     void tx.submit(async () => {
       // confirm_restock is called BY the buyer. Account names: household,
       // buyerMember, request, buyer. The buyer (not "caller") is the signer.
-      return program.methods
+      const signature = await program.methods
         .confirmRestock(unitCostHash)
         .accountsStrict({
           household,
@@ -514,6 +582,11 @@ function ConfirmRestockForm() {
           buyer: buyerWallet,
         })
         .rpc();
+      // Persist the actual offer's cleartext per-unit data keyed by this
+      // request id, so Phase E can score `actual vs benchmark`. No-op if the
+      // snapshot was typed freehand (no compare) — graceful.
+      if (actual) setActual(requestId, actual);
+      return signature;
     });
   };
 
@@ -545,7 +618,12 @@ function ConfirmRestockForm() {
         <Field
           label="Actual unit cost"
           value={unitCostInput}
-          onChange={setUnitCostInput}
+          onChange={(v) => {
+            setUnitCostInput(v);
+            // Manual edit after a compare choice: the structured actual no
+            // longer matches the text, so drop it (scoring simply won't fire).
+            if (actualSide) setActualSide(null);
+          }}
           placeholder='e.g. "Cheapest pack at store Y"'
           helpText="🔒 Private — only a scrambled fingerprint is recorded."
           onSubmit={handleSubmit}
@@ -560,11 +638,32 @@ function ConfirmRestockForm() {
           </Button>
         </div>
       </div>
+      <div className="flex items-center">
+        <Button variant="ghost" size="sm" onClick={() => setCompareOpen(true)}>
+          <span aria-hidden="true">⚖</span>
+          Compare prices
+        </Button>
+      </div>
       <ResultBanner
         pending={tx.pending}
         signature={tx.signature}
         error={tx.error}
         onDismiss={tx.reset}
+      />
+      <BestValueModal
+        open={compareOpen}
+        onClose={() => setCompareOpen(false)}
+        onChoose={(choice: BestValueChoice) => {
+          setUnitCostInput(choice.text);
+          setActualSide({
+            priceLamports: choice.priceLamports,
+            perUnitLamports: choice.perUnitLamports,
+            label: choice.label,
+            packUnits: choice.packUnits,
+            unitGrams: choice.unitGrams,
+          });
+          setCompareOpen(false);
+        }}
       />
     </SubPanel>
   );
@@ -576,7 +675,8 @@ function ConfirmRestockForm() {
 
 function CloseForm() {
   const program = useProgram();
-  const { household, connectedWallet, isOwnerConnected } = useHouseholdContext();
+  const { household, connectedWallet, isOwnerConnected } =
+    useHouseholdContext();
   const tx = useTransaction();
   const { requestIdInput, setRequestIdInput, requestId, requestIdError } =
     useRequestIdInput();

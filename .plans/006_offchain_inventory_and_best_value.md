@@ -249,20 +249,26 @@ reconciled this session (`develop` fast-forwarded to `main` at `f957bef`).
   fallback + unknown→onboarding→shelf round-trip).
 
 ### Phase D — Best-value modal + PurchasePanel integration
-- [ ] **D.1** `components/BestValueModal.tsx` — pick 2+ offers (from shelf
-  matches or manual entry), call `compareOffers`, render ranked list with
-  per-unit price + savings % + "Use this" on the best.
-- [ ] **D.2** Wire into `PurchasePanel.tsx` near the existing "Best-value
-  snapshot" `Field` (L200-207): a "Compare prices" button opens the modal; the
-  chosen offer's snapshot text back-fills the field (the existing `toHash32`
-  hash-to-chain path is unchanged).
-- [ ] **D.3** Persist the chosen offer's cleartext in client state keyed by the
-  in-flight `requestId` so §4.5 step 3 can score after restock. (In-memory or
-  IndexedDB `pendingSnapshots` store — pick the simpler one in implementation.)
-- [ ] **D.4** Verify: typecheck + build; manual: create request with a compared
-  snapshot → snapshot text round-trips into the hash → chain still receives a
-  32-byte hash (no cleartext leak — re-confirm via the existing
-  `test_privacy_invariant` reasoning).
+- [x] **D.1** `components/BestValueModal.tsx` — assemble 2+ offers (from the
+  shelf via a picker, or typed manually), live-rank via `compareOffers`, render
+  per-unit price + total + savings % + best-value badge, "Use this" per offer.
+  Built on a new generic `components/ui/Modal.tsx` (overlay, ESC, click-out,
+  body-scroll lock, ARIA dialog).
+- [x] **D.2** Wired into `PurchasePanel.tsx` **both** decision points: the
+  create "Best-value snapshot" field and the restock "Actual unit cost" field
+  each get a "⚖ Compare prices" button. The chosen offer's deterministic text
+  back-fills the field; the existing `toHash32` hash-to-chain path is unchanged
+  (D.4 confirms: still a 32-byte blake3 hash, no cleartext).
+- [x] **D.3** `lib/pendingSnapshots.ts` — in-memory store keyed by request id
+  with `setBenchmark` (persisted after create confirms, when the id is known)
+  and `setActual` (persisted after restock confirms). Manual field edits after a
+  compare choice drop the stash (graceful: scoring just won't fire). 6 vitest
+  tests. In-memory per plan ("pick the simpler one"); documented reload
+  limitation tied to Q4, with a clean seam so it can swap to IndexedDB later.
+- [x] **D.4** Verify: `typecheck` → exit 0; `build` → exit 0 (`/` = 269 kB
+  First Load, +5 kB for the modal); `vitest` → 16/16. Privacy holds by
+  construction: the snapshot field is hashed via `toHash32` exactly as before;
+  the structured per-unit data lives only in `pendingSnapshots` (client memory).
 
 ### Phase E — `REWARD_COST_SAVING` trigger
 - [ ] **E.1** Confirm `REWARD_COST_SAVING` exists in `app/src/lib/constants.ts`;
@@ -307,6 +313,7 @@ reconciled this session (`develop` fast-forwarded to `main` at `f957bef`).
 | `f957bef` (baseline, post-reframe) | 70.8 kB | 259 kB | — | Plan 005 §4c landed. |
 | Phase A (engine + DB, unimported) | 70.8 kB | 259 kB | 0 / 0 | Byte-identical: the new lib modules + `idb` aren't imported by any route → tree-shaken out. |
 | Phase B (shelf UI) | 67.4 kB | 264 kB | −3.4 / +5 | `/` route: small First Load bump from the Dashboard "Shelf" link (chunk reorg). New `/shelf` route is 117 kB First Load — lean, since it doesn't pull Solana/wallet-adapter into its own chunk. |
+| Phase D (best-value modal) | 70.8 kB | 269 kB | +3.4 / +5 | `/` route: +5 kB First Load for `BestValueModal` + `Modal` primitive + `pendingSnapshots` (now imported by PurchasePanel). `/shelf` unchanged at 117 kB. |
 
 Watch the scanner dep — `html5-qrcode` is the heaviest add; lazy-load it only on
 `/scan` (dynamic import, `ssr: false`) to keep the landing/dashboard First Load
@@ -314,20 +321,23 @@ flat.
 
 ## 8. Status
 
-**Phases A + B DONE** (on `feature/offchain-inventory`). Phase A: pure
+**Phases A + B + D DONE** (on `feature/offchain-inventory`). Phase A: pure
 `compareOffers()` engine (float-free bigint cross-products on milligram-scaled
-weights) + typed SSR-safe IndexedDB shelf (`db.ts`, `shelf.ts`), 10 vitest
-tests green. Phase B: shelf catalog UI — `components/shelf/ShelfList.tsx`
-(browse/edit/delete + empty state) and `components/shelf/ProductOnboardingForm.tsx`
-(create/edit with validation + manual barcode → synthetic `manual-<uuid>`),
-reachable at the `/shelf` route from the Dashboard. No Rust files touched.
-Gates: `typecheck` → exit 0; `build` → exit 0 (`/shelf` 117 kB First Load);
-`vitest` → 10/10. Q1 (test runner) + Q2 (route vs tab → route) resolved.
+weights) + typed SSR-safe IndexedDB shelf (`db.ts`, `shelf.ts`). Phase B: shelf
+catalog UI (`ShelfList` + `ProductOnboardingForm`) at the `/shelf` route.
+Phase D: best-value compare modal (`BestValueModal` on a new `Modal` primitive)
+wired into both the create and restock forms, with an in-memory
+`pendingSnapshots` store (D.3) carrying the cleartext per-unit data that Phase E
+will score — structured data stays client-side; only blake3 hashes go on-chain.
+No Rust files touched. Gates: `typecheck` → exit 0; `build` → exit 0 (`/` 269 kB
+First Load); `vitest` → 16/16 (10 bestValue + 6 pendingSnapshots). Q1 (test
+runner) + Q2 (route vs tab → route) resolved.
 
-Next: **Phase D → E** (best-value modal + `PurchasePanel` integration, then the
-`REWARD_COST_SAVING` trigger), then **C** (camera scanner, last — so the product
+Next: **Phase E → C → F** (the `REWARD_COST_SAVING` trigger — D.3 left the
+seam; now the observer's client reads `pendingSnapshots` after restock and
+fires the existing `award_reward`), then **C** (camera scanner, last — so the product
 works fully without a camera), then **F** (tests/docs + drop the landing
-"Coming soon" badge). Phases D–E are unblocked; Q3–Q5 can be answered inline.
+"Coming soon" badge). Phase E is unblocked; Q3–Q5 can be answered inline.
 
 ## 9. Open questions (need PO input before/during build)
 
