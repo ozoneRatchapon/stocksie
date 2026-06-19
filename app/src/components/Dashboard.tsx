@@ -18,6 +18,7 @@ import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import Link from "next/link";
 import { useProgram } from "@/lib/program";
 import { WalletButton } from "@/components/WalletButton";
+import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { StateView } from "@/components/StateView";
 import { HouseholdPanel } from "@/components/panels/HouseholdPanel";
 import { FundsPanel } from "@/components/panels/FundsPanel";
@@ -74,6 +75,7 @@ export function Dashboard() {
             <span aria-hidden="true">📷</span>
             Scan
           </Link>
+          <ThemeToggle />
           <WalletButton />
         </div>
       </header>
