@@ -177,16 +177,16 @@ export function ShelfList() {
       {actionError && (
         <div
           role="alert"
-          className="flex items-start gap-2 rounded-lg border border-rose-500/40 bg-rose-500/10 px-3 py-2.5 text-sm text-rose-200"
+          className="flex items-start gap-2 rounded-lg border border-rose-500/40 bg-rose-50 dark:bg-rose-500/10 px-3 py-2.5 text-sm text-rose-700 dark:text-rose-200"
         >
-          <p className="flex-1 break-words text-xs text-rose-200/90">
+          <p className="flex-1 break-words text-xs text-rose-700/90 dark:text-rose-200/90">
             {actionError}
           </p>
           <button
             type="button"
             onClick={() => setActionError(null)}
             aria-label="Dismiss"
-            className="-mr-1 -mt-1 flex-shrink-0 rounded p-1 text-rose-200/70 transition hover:bg-white/10 hover:text-rose-100"
+            className="-mr-1 -mt-1 flex-shrink-0 rounded p-1 text-rose-700/70 dark:text-rose-200/70 transition hover:bg-white/10 hover:text-rose-800 dark:hover:text-rose-100"
           >
             ✕
           </button>
@@ -199,9 +199,9 @@ export function ShelfList() {
 
       {/* Load failure (IndexedDB unavailable). */}
       {!loading && loadError && (
-        <div className="rounded-lg border border-dashed border-slate-700 bg-slate-950/30 p-5 text-sm text-slate-300">
-          <p className="font-medium text-slate-200">Couldn't open the shelf</p>
-          <p className="mt-1 text-xs text-slate-400">{loadError}</p>
+        <div className="rounded-lg border border-dashed border-stone-300 dark:border-slate-700 bg-stone-50/50 dark:bg-slate-950/30 p-5 text-sm text-stone-600 dark:text-slate-300">
+          <p className="font-medium text-stone-700 dark:text-slate-200">Couldn't open the shelf</p>
+          <p className="mt-1 text-xs text-stone-500 dark:text-slate-400">{loadError}</p>
           <Button
             variant="secondary"
             size="sm"
@@ -283,35 +283,35 @@ function ProductRow({
   return (
     <div
       className={
-        "flex flex-wrap items-center justify-between gap-3 rounded-lg border border-slate-800 bg-slate-950/40 px-4 py-3 transition-opacity" +
+        "flex flex-wrap items-center justify-between gap-3 rounded-lg border border-stone-200 dark:border-slate-800 bg-stone-50/60 dark:bg-slate-950/40 px-4 py-3 transition-opacity" +
         (isEditing ? " opacity-50" : "")
       }
     >
       {/* Identity + metadata. */}
       <div className="flex min-w-0 flex-col gap-1">
         <div className="flex flex-wrap items-center gap-2">
-          <span className="truncate text-sm font-medium text-slate-100">
+          <span className="truncate text-sm font-medium text-stone-800 dark:text-slate-100">
             {product.name}
           </span>
           {product.brand && (
-            <span className="truncate text-xs text-slate-400">
+            <span className="truncate text-xs text-stone-500 dark:text-slate-400">
               {product.brand}
             </span>
           )}
           {product.category && (
-            <Badge className="bg-slate-500/15 text-slate-300 ring-slate-400/30">
+            <Badge className="bg-stone-200 dark:bg-slate-500/15 text-stone-600 dark:text-slate-300 ring-stone-400/30 dark:ring-slate-400/30">
               {product.category}
             </Badge>
           )}
         </div>
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-500">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-stone-500 dark:text-slate-500">
           <span>
-            <span className="text-slate-300">{product.packUnits}</span>
+            <span className="text-stone-600 dark:text-slate-300">{product.packUnits}</span>
             <span className="ml-1">
               {product.packUnits === 1 ? "unit" : "units"}
             </span>
-            <span className="mx-1 text-slate-700">·</span>
-            <span className="text-slate-300">
+            <span className="mx-1 text-stone-300 dark:text-slate-700">·</span>
+            <span className="text-stone-600 dark:text-slate-300">
               {formatGrams(product.unitGrams)}
             </span>
             <span className="ml-1">per unit</span>
@@ -319,13 +319,13 @@ function ProductRow({
           {product.defaultPriceLamports !== undefined && (
             <span>
               last{" "}
-              <span className="text-slate-300">
+              <span className="text-stone-600 dark:text-slate-300">
                 {formatSol(product.defaultPriceLamports)}
               </span>
             </span>
           )}
           <code
-            className="font-mono text-[10px] text-slate-600"
+            className="font-mono text-[10px] text-stone-400 dark:text-slate-600"
             title="barcode / shelf id"
           >
             {product.barcode}
@@ -337,7 +337,7 @@ function ProductRow({
       <div className="flex shrink-0 items-center gap-2">
         {isConfirmingDelete ? (
           <>
-            <span className="text-xs text-rose-300">Delete?</span>
+            <span className="text-xs text-rose-600 dark:text-rose-300">Delete?</span>
             <Button variant="danger" size="sm" onClick={onConfirmDelete}>
               Delete
             </Button>
@@ -371,9 +371,9 @@ function ProductRow({
 /** Friendly first-run state. One clear CTA; no clutter. */
 function EmptyState({ onAdd }: { onAdd: () => void }) {
   return (
-    <div className="flex flex-col items-start gap-3 rounded-lg border border-dashed border-slate-700 bg-slate-950/30 p-6">
-      <p className="text-sm font-medium text-slate-200">Your shelf is empty</p>
-      <p className="max-w-prose text-xs leading-relaxed text-slate-500">
+    <div className="flex flex-col items-start gap-3 rounded-lg border border-dashed border-stone-300 dark:border-slate-700 bg-stone-50/50 dark:bg-slate-950/30 p-6">
+      <p className="text-sm font-medium text-stone-700 dark:text-slate-200">Your shelf is empty</p>
+      <p className="max-w-prose text-xs leading-relaxed text-stone-500 dark:text-slate-500">
         Add the things your household restocks — dish soap, rice, laundry pods,
         anything. Once they're on the shelf, future purchase requests can be
         prefilled and compared across pack sizes for the best per-unit price.
@@ -394,7 +394,7 @@ function ListSkeleton() {
       {[0, 1, 2].map((i) => (
         <li
           key={i}
-          className="h-[68px] animate-pulse rounded-lg border border-slate-800/70 bg-slate-950/30"
+          className="h-[68px] animate-pulse rounded-lg border border-stone-200 dark:border-slate-800/70 bg-stone-50/50 dark:bg-slate-950/30"
         />
       ))}
     </ul>

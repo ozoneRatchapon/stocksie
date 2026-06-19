@@ -380,7 +380,7 @@ function ApproveForm() {
         label="Approve the request"
         hint="Admin or approver. Sign in as the household admin (or set the admin address above to your account) to approve requests."
       >
-        <p className="rounded-lg border border-dashed border-slate-700 bg-slate-950/30 px-4 py-3 text-xs text-slate-400">
+        <p className="rounded-lg border border-dashed border-stone-300 dark:border-slate-700 bg-stone-50/50 dark:bg-slate-950/30 px-4 py-3 text-xs text-stone-500 dark:text-slate-400">
           You're not signed in as this household's admin. Approvals are
           admin-only in this reference UI; the on-chain gate also admits the
           Parent role.
@@ -475,7 +475,7 @@ function RejectForm() {
         label="Decline the request"
         hint="Admin or approver. Sign in as the household admin (or set the admin address above to your account) to decline requests."
       >
-        <p className="rounded-lg border border-dashed border-slate-700 bg-slate-950/30 px-4 py-3 text-xs text-slate-400">
+        <p className="rounded-lg border border-dashed border-stone-300 dark:border-slate-700 bg-stone-50/50 dark:bg-slate-950/30 px-4 py-3 text-xs text-stone-500 dark:text-slate-400">
           You're not signed in as this household's admin. Declines are
           admin-only in this reference UI; the on-chain gate also admits the
           Parent role.
@@ -799,7 +799,7 @@ function CostSavingRewardForm() {
         label="Award a cost-saving reward"
         hint="Admin or approver. When a buyer beats the best-value snapshot, the admin (or an approver) awards them 50 reward points. Sign in as the household admin (or set the admin address above to your account) to do this."
       >
-        <p className="rounded-lg border border-dashed border-slate-700 bg-slate-950/30 px-4 py-3 text-xs text-slate-400">
+        <p className="rounded-lg border border-dashed border-stone-300 dark:border-slate-700 bg-stone-50/50 dark:bg-slate-950/30 px-4 py-3 text-xs text-stone-500 dark:text-slate-400">
           You're not signed in as this household's admin. Cost-saving rewards
           are admin-only in this reference UI; the on-chain gate also admits the
           Parent role.
@@ -886,7 +886,7 @@ function CostSavingHint({
   // rather than the generic "no data" message).
   if (awardedId !== null && awardedId === requestId) {
     return (
-      <p className="rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-xs text-emerald-200">
+      <p className="rounded-lg border border-emerald-500/30 bg-emerald-50 dark:bg-emerald-500/10 px-4 py-3 text-xs text-emerald-700 dark:text-emerald-200">
         Done — the buyer earned {REWARD_COST_SAVING.toString()} cost-saving
         reward points. The on-chain receipt above is the audit trail.
       </p>
@@ -895,7 +895,7 @@ function CostSavingHint({
 
   if (saving === null) {
     return (
-      <p className="rounded-lg border border-dashed border-slate-700 bg-slate-950/30 px-4 py-3 text-xs text-slate-400">
+      <p className="rounded-lg border border-dashed border-stone-300 dark:border-slate-700 bg-stone-50/50 dark:bg-slate-950/30 px-4 py-3 text-xs text-stone-500 dark:text-slate-400">
         No comparison data for this request on this device. That happens when
         the snapshot or the actual cost was typed by hand (not set via “Compare
         prices”), when this is a different browser than the one that recorded
@@ -906,7 +906,7 @@ function CostSavingHint({
 
   if (saving.isSaving) {
     return (
-      <p className="rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-xs text-emerald-200">
+      <p className="rounded-lg border border-emerald-500/30 bg-emerald-50 dark:bg-emerald-500/10 px-4 py-3 text-xs text-emerald-700 dark:text-emerald-200">
         {pending
           ? "Awarding the cost-saving reward…"
           : `Smart saving detected — the buyer paid less per unit than the snapshot benchmark (saving ${
@@ -917,7 +917,7 @@ function CostSavingHint({
   }
 
   return (
-    <p className="rounded-lg border border-dashed border-slate-700 bg-slate-950/30 px-4 py-3 text-xs text-slate-400">
+    <p className="rounded-lg border border-dashed border-stone-300 dark:border-slate-700 bg-stone-50/50 dark:bg-slate-950/30 px-4 py-3 text-xs text-stone-500 dark:text-slate-400">
       No saving on this request — the buyer didn't beat the best-value snapshot,
       so no cost-saving reward is due.
     </p>
@@ -974,7 +974,7 @@ function CloseForm() {
         label="Close the request"
         hint="Admin or approver. Sign in as the household admin (or set the admin address above to your account) to close requests."
       >
-        <p className="rounded-lg border border-dashed border-slate-700 bg-slate-950/30 px-4 py-3 text-xs text-slate-400">
+        <p className="rounded-lg border border-dashed border-stone-300 dark:border-slate-700 bg-stone-50/50 dark:bg-slate-950/30 px-4 py-3 text-xs text-stone-500 dark:text-slate-400">
           You're not signed in as this household's admin. Closures are
           admin-only in this reference UI; the on-chain gate also admits the
           Parent role.

@@ -15,18 +15,18 @@ import { cn } from '@/lib/cn';
 import { ROLE_LABELS, STATUS_LABELS, type Role, type Status } from '@/lib/types';
 
 const STATUS_CLASSES: Record<Status, string> = {
-  pending: 'bg-amber-500/15 text-amber-300 ring-amber-500/30',
-  approved: 'bg-emerald-500/15 text-emerald-300 ring-emerald-500/30',
-  restocked: 'bg-sky-500/15 text-sky-300 ring-sky-500/30',
-  reimbursed: 'bg-violet-500/15 text-violet-300 ring-violet-500/30',
-  rejected: 'bg-rose-500/15 text-rose-300 ring-rose-500/30',
+  pending: 'bg-amber-50 dark:bg-amber-500/15 text-amber-600 dark:text-amber-300 ring-amber-500/30',
+  approved: 'bg-emerald-50 dark:bg-emerald-500/15 text-emerald-600 dark:text-emerald-300 ring-emerald-500/30',
+  restocked: 'bg-sky-50 dark:bg-sky-500/15 text-sky-600 dark:text-sky-300 ring-sky-500/30',
+  reimbursed: 'bg-violet-50 dark:bg-violet-500/15 text-violet-600 dark:text-violet-300 ring-violet-500/30',
+  rejected: 'bg-rose-50 dark:bg-rose-500/15 text-rose-600 dark:text-rose-300 ring-rose-500/30',
 };
 
 const ROLE_CLASSES: Record<Role, string> = {
-  owner: 'bg-amber-500/15 text-amber-300 ring-amber-500/30',
-  parent: 'bg-sky-500/15 text-sky-300 ring-sky-500/30',
-  child: 'bg-slate-500/15 text-slate-200 ring-slate-400/30',
-  guest: 'bg-zinc-500/15 text-zinc-400 ring-zinc-500/30',
+  owner: 'bg-amber-50 dark:bg-amber-500/15 text-amber-600 dark:text-amber-300 ring-amber-500/30',
+  parent: 'bg-sky-50 dark:bg-sky-500/15 text-sky-600 dark:text-sky-300 ring-sky-500/30',
+  child: 'bg-stone-200 dark:bg-slate-500/15 text-stone-700 dark:text-slate-200 ring-stone-400/30 dark:ring-slate-400/30',
+  guest: 'bg-zinc-100 dark:bg-zinc-500/15 text-zinc-600 dark:text-zinc-400 ring-zinc-500/30',
 };
 
 const BASE_CLASS =

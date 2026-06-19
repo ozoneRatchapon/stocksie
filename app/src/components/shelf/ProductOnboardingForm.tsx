@@ -189,12 +189,12 @@ export function ProductOnboardingForm({
   };
 
   return (
-    <div className="flex flex-col gap-4 rounded-lg border border-slate-800 bg-slate-950/40 p-4">
+    <div className="flex flex-col gap-4 rounded-lg border border-stone-200 dark:border-slate-800 bg-stone-50/60 dark:bg-slate-950/40 p-4">
       <div className="flex flex-col gap-0.5">
-        <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-300">
+        <h3 className="text-xs font-semibold uppercase tracking-wide text-stone-600 dark:text-slate-300">
           {isEdit ? "Edit product" : "Add a product to your shelf"}
         </h3>
-        <p className="text-xs leading-relaxed text-slate-500">
+        <p className="text-xs leading-relaxed text-stone-500 dark:text-slate-500">
           {isEdit
             ? "Update the details for this product. The barcode is fixed (it identifies the record)."
             : "Catalog an essential so the best-value engine can compare packs later. Name, pack size, and unit weight are required; everything else is optional."}

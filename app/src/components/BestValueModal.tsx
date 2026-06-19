@@ -225,7 +225,7 @@ export function BestValueModal({
       </div>
 
       {validCount < 2 && (
-        <p className="mt-3 text-xs text-slate-500">
+        <p className="mt-3 text-xs text-stone-500 dark:text-slate-500">
           {validCount === 0
             ? "Enter a label, a price, and the pack size + unit weight for each offer. The best value is the cheapest per unit, not per pack."
             : "Add at least one more valid offer to see the ranking."}
@@ -284,8 +284,8 @@ function DraftRow({
   return (
     <div
       className={cn(
-        "rounded-lg border bg-slate-950/40 p-3",
-        ranked?.isBest ? "border-emerald-500/50" : "border-slate-800"
+        "rounded-lg border bg-stone-50/60 dark:bg-slate-950/40 p-3",
+        ranked?.isBest ? "border-emerald-500/50" : "border-stone-200 dark:border-slate-800"
       )}
     >
       <div className="flex items-center justify-between gap-2">
@@ -294,15 +294,15 @@ function DraftRow({
             <Badge
               className={cn(
                 ranked.isBest
-                  ? "bg-emerald-500/15 text-emerald-300 ring-emerald-500/30"
-                  : "bg-slate-600/20 text-slate-300 ring-slate-500/30"
+                  ? "bg-emerald-50 dark:bg-emerald-500/15 text-emerald-600 dark:text-emerald-300 ring-emerald-500/30"
+                  : "bg-stone-300/40 dark:bg-slate-600/20 text-stone-600 dark:text-slate-300 ring-stone-400/30 dark:ring-slate-500/30"
               )}
             >
               {ranked.isBest ? "Best value" : `#${ranked.rank}`}
             </Badge>
           )}
           {draft.productId && (
-            <Badge className="bg-sky-500/15 text-sky-300 ring-sky-500/30">
+            <Badge className="bg-sky-50 dark:bg-sky-500/15 text-sky-600 dark:text-sky-300 ring-sky-500/30">
               from shelf
             </Badge>
           )}
@@ -312,7 +312,7 @@ function DraftRow({
             type="button"
             onClick={onRemove}
             aria-label="Remove offer"
-            className="rounded p-1 text-slate-500 transition hover:bg-slate-800 hover:text-slate-300"
+            className="rounded p-1 text-stone-500 dark:text-slate-500 transition hover:bg-white dark:hover:bg-slate-800 hover:text-stone-600 dark:hover:text-slate-300"
           >
             ✕
           </button>
@@ -321,7 +321,7 @@ function DraftRow({
 
       <div className="mt-2 grid gap-2 sm:grid-cols-2">
         <label className="flex flex-col gap-1 sm:col-span-2">
-          <span className="text-[10px] font-medium uppercase tracking-wide text-slate-500">
+          <span className="text-[10px] font-medium uppercase tracking-wide text-stone-500 dark:text-slate-500">
             Label
           </span>
           <input
@@ -330,11 +330,11 @@ function DraftRow({
             onChange={(e) => onChange({ label: e.target.value })}
             placeholder='e.g. "Dish soap, 2-pack"'
             spellCheck={false}
-            className="w-full rounded-lg border border-slate-800 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition placeholder:text-slate-600 focus:border-emerald-500/70 focus:ring-1 focus:ring-emerald-500/40"
+            className="w-full rounded-lg border border-stone-200 dark:border-slate-800 bg-white dark:bg-slate-950/60 px-3 py-2 text-sm text-stone-800 dark:text-slate-100 outline-none transition placeholder:text-stone-400 dark:placeholder:text-slate-600 focus:border-emerald-500/70 focus:ring-1 focus:ring-emerald-500/40"
           />
         </label>
         <label className="flex flex-col gap-1">
-          <span className="text-[10px] font-medium uppercase tracking-wide text-slate-500">
+          <span className="text-[10px] font-medium uppercase tracking-wide text-stone-500 dark:text-slate-500">
             Price
           </span>
           <input
@@ -344,12 +344,12 @@ function DraftRow({
             placeholder="0.05"
             min={0}
             step={0.0001}
-            className="w-full rounded-lg border border-slate-800 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition placeholder:text-slate-600 focus:border-emerald-500/70 focus:ring-1 focus:ring-emerald-500/40"
+            className="w-full rounded-lg border border-stone-200 dark:border-slate-800 bg-white dark:bg-slate-950/60 px-3 py-2 text-sm text-stone-800 dark:text-slate-100 outline-none transition placeholder:text-stone-400 dark:placeholder:text-slate-600 focus:border-emerald-500/70 focus:ring-1 focus:ring-emerald-500/40"
           />
         </label>
         <div className="grid grid-cols-2 gap-2">
           <label className="flex flex-col gap-1">
-            <span className="text-[10px] font-medium uppercase tracking-wide text-slate-500">
+            <span className="text-[10px] font-medium uppercase tracking-wide text-stone-500 dark:text-slate-500">
               Pack
             </span>
             <input
@@ -359,11 +359,11 @@ function DraftRow({
               placeholder="2"
               min={1}
               step={1}
-              className="w-full rounded-lg border border-slate-800 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition placeholder:text-slate-600 focus:border-emerald-500/70 focus:ring-1 focus:ring-emerald-500/40"
+              className="w-full rounded-lg border border-stone-200 dark:border-slate-800 bg-white dark:bg-slate-950/60 px-3 py-2 text-sm text-stone-800 dark:text-slate-100 outline-none transition placeholder:text-stone-400 dark:placeholder:text-slate-600 focus:border-emerald-500/70 focus:ring-1 focus:ring-emerald-500/40"
             />
           </label>
           <label className="flex flex-col gap-1">
-            <span className="text-[10px] font-medium uppercase tracking-wide text-slate-500">
+            <span className="text-[10px] font-medium uppercase tracking-wide text-stone-500 dark:text-slate-500">
               g / unit
             </span>
             <input
@@ -373,7 +373,7 @@ function DraftRow({
               placeholder="500"
               min={0}
               step={0.1}
-              className="w-full rounded-lg border border-slate-800 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-emerald-500/70 focus:ring-1 focus:ring-emerald-500/40"
+              className="w-full rounded-lg border border-stone-200 dark:border-slate-800 bg-white dark:bg-slate-950/60 px-3 py-2 text-sm text-stone-800 dark:text-slate-100 outline-none transition placeholder:text-stone-500 dark:placeholder:text-slate-500 focus:border-emerald-500/70 focus:ring-1 focus:ring-emerald-500/40"
             />
           </label>
         </div>
@@ -381,22 +381,22 @@ function DraftRow({
 
       {/* Computed per-unit + actions, shown once the draft is a valid offer. */}
       {isValid && ranked && (
-        <div className="mt-2 flex flex-wrap items-center justify-between gap-2 border-t border-slate-800/70 pt-2">
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-400">
+        <div className="mt-2 flex flex-wrap items-center justify-between gap-2 border-t border-stone-200 dark:border-slate-800/70 pt-2">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-stone-500 dark:text-slate-400">
             <span>
-              <span className="text-slate-500">total</span>{" "}
-              <span className="text-slate-200">
+              <span className="text-stone-500 dark:text-slate-500">total</span>{" "}
+              <span className="text-stone-700 dark:text-slate-200">
                 {formatSol(ranked.priceLamports)}
               </span>
             </span>
             <span>
-              <span className="text-slate-500">per unit</span>{" "}
-              <span className="text-slate-200">
+              <span className="text-stone-500 dark:text-slate-500">per unit</span>{" "}
+              <span className="text-stone-700 dark:text-slate-200">
                 {ranked.perUnitLamportsRounded.toLocaleString()} lamports/g
               </span>
             </span>
             {rankedCount >= 2 && !ranked.isBest && (
-              <span className="text-amber-300/90">
+              <span className="text-amber-600/90 dark:text-amber-300/90">
                 {ranked.savingsPctVsBest.toFixed(0)}% pricier than best
               </span>
             )}
@@ -426,26 +426,26 @@ function AddFromShelf({
   onPick: (product: ShelfProduct) => void;
 }) {
   if (loading) {
-    return <span className="text-xs text-slate-500">Loading your shelf…</span>;
+    return <span className="text-xs text-stone-500 dark:text-slate-500">Loading your shelf…</span>;
   }
   if (error) {
     return (
-      <span className="text-xs text-rose-400/80" title={error}>
+      <span className="text-xs text-rose-600/80 dark:text-rose-400/80" title={error}>
         Shelf unavailable — use manual offers.
       </span>
     );
   }
   if (shelf.length === 0) {
     return (
-      <span className="text-xs text-slate-500">
+      <span className="text-xs text-stone-500 dark:text-slate-500">
         Your shelf is empty — add products on the{" "}
-        <span className="text-slate-400">Shelf</span> page to compare them here.
+        <span className="text-stone-500 dark:text-slate-400">Shelf</span> page to compare them here.
       </span>
     );
   }
   return (
-    <label className="flex items-center gap-2 text-xs text-slate-400">
-      <span className="font-medium uppercase tracking-wide text-slate-500">
+    <label className="flex items-center gap-2 text-xs text-stone-500 dark:text-slate-400">
+      <span className="font-medium uppercase tracking-wide text-stone-500 dark:text-slate-500">
         From shelf
       </span>
       <select
@@ -457,7 +457,7 @@ function AddFromShelf({
           const product = shelf.find((p) => p.barcode === barcode);
           if (product) onPick(product);
         }}
-        className="h-8 rounded-md border border-slate-700 bg-slate-800 px-2 text-xs text-slate-100 outline-none transition focus:border-emerald-500/70"
+        className="h-8 rounded-md border border-stone-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-2 text-xs text-stone-800 dark:text-slate-100 outline-none transition focus:border-emerald-500/70"
       >
         <option value="">Add a product…</option>
         {shelf.map((p) => (

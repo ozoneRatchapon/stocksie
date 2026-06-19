@@ -86,9 +86,9 @@ export function ResultBanner({
       aria-live="polite"
       className={cn(
         'mt-3 flex items-start gap-3 rounded-lg border px-3 py-2.5 text-sm',
-        isPending && 'border-amber-500/40 bg-amber-500/10 text-amber-200',
-        isSuccess && 'border-emerald-500/40 bg-emerald-500/10 text-emerald-200',
-        isError && 'border-rose-500/40 bg-rose-500/10 text-rose-200',
+        isPending && 'border-amber-500/40 bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-200',
+        isSuccess && 'border-emerald-500/40 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-200',
+        isError && 'border-rose-500/40 bg-rose-50 dark:bg-rose-500/10 text-rose-700 dark:text-rose-200',
         className,
       )}
     >
@@ -107,10 +107,10 @@ export function ResultBanner({
           <div className="flex flex-col gap-1">
             <p className="font-medium">Done</p>
             <div className="flex items-center gap-2">
-              <span className="text-[10px] uppercase tracking-wide text-emerald-400/70">
+              <span className="text-[10px] uppercase tracking-wide text-emerald-600/70 dark:text-emerald-400/70">
                 Receipt ID
               </span>
-              <code className="truncate font-mono text-xs text-emerald-300/90">
+              <code className="truncate font-mono text-xs text-emerald-600/90 dark:text-emerald-300/90">
                 {signature}
               </code>
             </div>
@@ -119,14 +119,14 @@ export function ResultBanner({
                 href={explorerTxUrl(connection.rpcEndpoint, signature)}
                 target="_blank"
                 rel="noreferrer noopener"
-                className="font-medium text-emerald-300 underline-offset-2 hover:underline"
+                className="font-medium text-emerald-600 dark:text-emerald-300 underline-offset-2 hover:underline"
               >
                 View receipt ↗
               </a>
               <button
                 type="button"
                 onClick={handleCopy}
-                className="font-medium text-emerald-300/80 underline-offset-2 hover:text-emerald-200 hover:underline"
+                className="font-medium text-emerald-600/80 dark:text-emerald-300/80 underline-offset-2 hover:text-emerald-700 dark:hover:text-emerald-200 hover:underline"
               >
                 {copied ? 'Copied' : 'Copy receipt ID'}
               </button>
@@ -137,7 +137,7 @@ export function ResultBanner({
         {isError && (
           <div className="flex flex-col gap-0.5">
             <p className="font-medium">Couldn't complete</p>
-            <p className="break-words text-xs text-rose-200/90">{error}</p>
+            <p className="break-words text-xs text-rose-700/90 dark:text-rose-200/90">{error}</p>
           </div>
         )}
       </div>

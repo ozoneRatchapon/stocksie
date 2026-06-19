@@ -95,7 +95,7 @@ function AwardRewardForm() {
         label="Give reward points"
         hint="Admin or approver. Sign in as the household admin (or set the admin address above to your account) to give reward points."
       >
-        <p className="rounded-lg border border-dashed border-slate-700 bg-slate-950/30 px-4 py-3 text-xs text-slate-400">
+        <p className="rounded-lg border border-dashed border-stone-300 dark:border-slate-700 bg-stone-50/50 dark:bg-slate-950/30 px-4 py-3 text-xs text-stone-500 dark:text-slate-400">
           You're not signed in as this household's admin. Giving reward points
           is admin-only in this reference UI; the on-chain gate also admits the
           Parent role.
@@ -254,7 +254,7 @@ function RewardSummaryForm() {
         >
           Show my score
         </Button>
-        <span className="text-xs text-slate-500">
+        <span className="text-xs text-stone-500 dark:text-slate-500">
           Doesn't change any balances — your score is also shown in the
           household view above.
         </span>

@@ -38,10 +38,10 @@ export function ConnectGate({ requireHousehold = true, children }: ConnectGatePr
   if (!isConnected) {
     return (
       <GateShell>
-        <p className="text-sm text-slate-300">
+        <p className="text-sm text-stone-600 dark:text-slate-300">
           Sign in to use this.
         </p>
-        <p className="text-xs text-slate-500">
+        <p className="text-xs text-stone-500 dark:text-slate-500">
           Sign in with Phantom, Solflare, or Backpack — or use the built-in
           dev account to try Stocksie on the local cluster.
         </p>
@@ -53,10 +53,10 @@ export function ConnectGate({ requireHousehold = true, children }: ConnectGatePr
   if (requireHousehold && !household) {
     return (
       <GateShell>
-        <p className="text-sm text-slate-300">
+        <p className="text-sm text-stone-600 dark:text-slate-300">
           Enter the household admin's address above to load your household.
         </p>
-        <p className="text-xs text-slate-500">
+        <p className="text-xs text-stone-500 dark:text-slate-500">
           Your household is tied to its admin's address. It defaults to your
           own account; change it if you joined a household someone else set up.
         </p>
@@ -70,7 +70,7 @@ export function ConnectGate({ requireHousehold = true, children }: ConnectGatePr
 /** Shared visual wrapper for both gate states — a muted, dashed-bordered box. */
 function GateShell({ children }: { children: ReactNode }) {
   return (
-    <div className="flex flex-col items-start gap-3 rounded-lg border border-dashed border-slate-700 bg-slate-950/30 p-5">
+    <div className="flex flex-col items-start gap-3 rounded-lg border border-dashed border-stone-300 dark:border-slate-700 bg-stone-50/50 dark:bg-slate-950/30 p-5">
       {children}
     </div>
   );

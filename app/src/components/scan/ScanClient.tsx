@@ -139,8 +139,8 @@ export function ScanClient() {
         {/* Manual entry — the always-available fallback for desktops, denied
             cameras, and insecure contexts. A typed code follows the exact
             same lookup path as a camera scan. */}
-        <div className="flex flex-col gap-2 border-t border-slate-800 pt-5">
-          <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
+        <div className="flex flex-col gap-2 border-t border-stone-200 dark:border-slate-800 pt-5">
+          <p className="text-xs font-medium uppercase tracking-wide text-stone-500 dark:text-slate-400">
             Or type a barcode
           </p>
           <Field
@@ -166,7 +166,7 @@ export function ScanClient() {
         {lookupError && (
           <div
             role="alert"
-            className="rounded-lg border border-rose-500/40 bg-rose-500/10 px-4 py-3 text-xs text-rose-200"
+            className="rounded-lg border border-rose-500/40 bg-rose-50 dark:bg-rose-500/10 px-4 py-3 text-xs text-rose-700 dark:text-rose-200"
           >
             {lookupError}
           </div>
@@ -238,31 +238,31 @@ function ResultView({
 function ProductCard({ product }: { product: ShelfProduct }) {
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex flex-wrap items-start justify-between gap-3 rounded-lg border border-slate-800 bg-slate-950/40 px-4 py-3">
+      <div className="flex flex-wrap items-start justify-between gap-3 rounded-lg border border-stone-200 dark:border-slate-800 bg-stone-50/60 dark:bg-slate-950/40 px-4 py-3">
         <div className="flex min-w-0 flex-col gap-1">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="truncate text-base font-medium text-slate-100">
+            <span className="truncate text-base font-medium text-stone-800 dark:text-slate-100">
               {product.name}
             </span>
             {product.brand && (
-              <span className="truncate text-xs text-slate-400">
+              <span className="truncate text-xs text-stone-500 dark:text-slate-400">
                 {product.brand}
               </span>
             )}
             {product.category && (
-              <Badge className="bg-slate-500/15 text-slate-300 ring-slate-400/30">
+              <Badge className="bg-stone-200 dark:bg-slate-500/15 text-stone-600 dark:text-slate-300 ring-stone-400/30 dark:ring-slate-400/30">
                 {product.category}
               </Badge>
             )}
           </div>
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-500">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-stone-500 dark:text-slate-500">
             <span>
-              <span className="text-slate-300">{product.packUnits}</span>
+              <span className="text-stone-600 dark:text-slate-300">{product.packUnits}</span>
               <span className="ml-1">
                 {product.packUnits === 1 ? "unit" : "units"}
               </span>
-              <span className="mx-1 text-slate-700">·</span>
-              <span className="text-slate-300">
+              <span className="mx-1 text-stone-300 dark:text-slate-700">·</span>
+              <span className="text-stone-600 dark:text-slate-300">
                 {formatGrams(product.unitGrams)}
               </span>
               <span className="ml-1">per unit</span>
@@ -270,13 +270,13 @@ function ProductCard({ product }: { product: ShelfProduct }) {
             {product.defaultPriceLamports !== undefined && (
               <span>
                 last{" "}
-                <span className="text-slate-300">
+                <span className="text-stone-600 dark:text-slate-300">
                   {formatSol(product.defaultPriceLamports)}
                 </span>
               </span>
             )}
             <code
-              className="font-mono text-[10px] text-slate-600"
+              className="font-mono text-[10px] text-stone-400 dark:text-slate-600"
               title="barcode / shelf id"
             >
               {product.barcode}
@@ -290,12 +290,12 @@ function ProductCard({ product }: { product: ShelfProduct }) {
       <div className="flex flex-wrap items-center gap-3">
         <Link
           href="/"
-          className="inline-flex h-10 items-center gap-2 rounded-lg bg-emerald-500 px-4 text-sm font-medium text-slate-950 transition-colors hover:bg-emerald-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-400"
+          className="inline-flex h-10 items-center gap-2 rounded-lg bg-emerald-500 px-4 text-sm font-medium text-slate-950 transition-colors hover:bg-emerald-500 dark:hover:bg-emerald-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600 dark:focus-visible:outline-emerald-400"
         >
           <span aria-hidden="true">🛒</span>
           Start a purchase
         </Link>
-        <p className="text-xs text-slate-500">
+        <p className="text-xs text-stone-500 dark:text-slate-500">
           Opens your dashboard — sign in there to spend against the household
           budget.
         </p>

@@ -103,10 +103,10 @@ export function Select({
     <div className={cn('flex flex-col gap-1.5', className)}>
       <label
         htmlFor={id}
-        className="text-xs font-medium uppercase tracking-wide text-slate-400"
+        className="text-xs font-medium uppercase tracking-wide text-stone-500 dark:text-slate-400"
       >
         {label}
-        {required && <span className="ml-0.5 text-rose-400">*</span>}
+        {required && <span className="ml-0.5 text-rose-600 dark:text-rose-400">*</span>}
       </label>
       <div className="relative flex items-center">
         <select
@@ -120,12 +120,12 @@ export function Select({
           aria-invalid={hasError || undefined}
           aria-describedby={helpText || hasError ? describedById : undefined}
           className={cn(
-            'w-full appearance-none rounded-lg border bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition',
+            'w-full appearance-none rounded-lg border bg-white dark:bg-slate-950/60 px-3 py-2 text-sm text-stone-800 dark:text-slate-100 outline-none transition',
             'focus:border-emerald-500/70 focus:ring-1 focus:ring-emerald-500/40',
             'disabled:cursor-not-allowed disabled:opacity-50',
             // Right padding leaves room for the chevron adornment.
             'pr-9',
-            hasError ? 'border-rose-500/70' : 'border-slate-800',
+            hasError ? 'border-rose-500/70' : 'border-stone-200 dark:border-slate-800',
           )}
         >
           {showPlaceholder && (
@@ -143,7 +143,7 @@ export function Select({
             self-contained (no icon-library dependency). `pointer-events-none`
             so clicks fall through to the native `<select>` toggle. */}
         <svg
-          className="pointer-events-none absolute right-3 h-4 w-4 text-slate-500"
+          className="pointer-events-none absolute right-3 h-4 w-4 text-stone-500 dark:text-slate-500"
           viewBox="0 0 20 20"
           fill="none"
           aria-hidden="true"
@@ -160,7 +160,7 @@ export function Select({
       {(helpText || hasError) && (
         <p
           id={describedById}
-          className={cn('text-xs', hasError ? 'text-rose-400' : 'text-slate-500')}
+          className={cn('text-xs', hasError ? 'text-rose-600 dark:text-rose-400' : 'text-stone-500 dark:text-slate-500')}
         >
           {hasError ? error : helpText}
         </p>

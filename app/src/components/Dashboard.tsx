@@ -44,11 +44,11 @@ export function Dashboard() {
       {/* ----------------------------------------------------------------- */}
       <header className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h1 className="flex items-center gap-2 text-2xl font-semibold tracking-tight text-slate-100">
+          <h1 className="flex items-center gap-2 text-2xl font-semibold tracking-tight text-stone-800 dark:text-slate-100">
             <span aria-hidden="true">🏠</span>
             Stocksie
           </h1>
-          <p className="text-sm text-slate-400">
+          <p className="text-sm text-stone-500 dark:text-slate-400">
             Shop together, stay on budget, earn rewards.
           </p>
         </div>
@@ -63,14 +63,14 @@ export function Dashboard() {
         <div className="flex items-center gap-2">
           <Link
             href="/shelf"
-            className="inline-flex h-10 items-center gap-2 rounded-lg border border-slate-700 bg-slate-800 px-4 text-sm font-medium text-slate-100 transition-colors hover:bg-slate-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-500"
+            className="inline-flex h-10 items-center gap-2 rounded-lg border border-stone-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 text-sm font-medium text-stone-800 dark:text-slate-100 transition-colors hover:bg-stone-200 dark:hover:bg-slate-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stone-400 dark:focus-visible:outline-slate-500"
           >
             <span aria-hidden="true">📦</span>
             Shelf
           </Link>
           <Link
             href="/scan"
-            className="inline-flex h-10 items-center gap-2 rounded-lg border border-slate-700 bg-slate-800 px-4 text-sm font-medium text-slate-100 transition-colors hover:bg-slate-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-500"
+            className="inline-flex h-10 items-center gap-2 rounded-lg border border-stone-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 text-sm font-medium text-stone-800 dark:text-slate-100 transition-colors hover:bg-stone-200 dark:hover:bg-slate-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stone-400 dark:focus-visible:outline-slate-500"
           >
             <span aria-hidden="true">📷</span>
             Scan
@@ -85,21 +85,21 @@ export function Dashboard() {
       {/* ----------------------------------------------------------------- */}
       <section className="mt-4">
         {connected && shortAddr ? (
-          <div className="inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs text-emerald-300">
+          <div className="inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-50 dark:bg-emerald-500/10 px-3 py-1 text-xs text-emerald-600 dark:text-emerald-300">
             <span
-              className="h-1.5 w-1.5 rounded-full bg-emerald-400"
+              className="h-1.5 w-1.5 rounded-full bg-emerald-500 dark:bg-emerald-400"
               aria-hidden="true"
             />
             <span className="font-medium">Signed in</span>
-            <span className="text-emerald-400/60">·</span>
-            <code className="font-mono text-[11px] text-emerald-200/80">
+            <span className="text-emerald-600/60 dark:text-emerald-400/60">·</span>
+            <code className="font-mono text-[11px] text-emerald-700/80 dark:text-emerald-200/80">
               {shortAddr}
             </code>
           </div>
         ) : (
-          <div className="inline-flex items-center gap-2 rounded-full border border-slate-700 bg-slate-900/40 px-3 py-1 text-xs text-slate-400">
+          <div className="inline-flex items-center gap-2 rounded-full border border-stone-300 dark:border-slate-700 bg-white dark:bg-slate-900/40 px-3 py-1 text-xs text-stone-500 dark:text-slate-400">
             <span
-              className="h-1.5 w-1.5 rounded-full bg-slate-500"
+              className="h-1.5 w-1.5 rounded-full bg-slate-400 dark:bg-slate-500"
               aria-hidden="true"
             />
             <span>Not signed in — sign in to start</span>
@@ -128,11 +128,11 @@ export function Dashboard() {
       {/* ----------------------------------------------------------------- */}
       {/* Footer hint                                                       */}
       {/* ----------------------------------------------------------------- */}
-      <footer className="mt-10 border-t border-slate-800 pt-5 text-xs text-slate-500">
+      <footer className="mt-10 border-t border-stone-200 dark:border-slate-800 pt-5 text-xs text-stone-500 dark:text-slate-500">
         {connected && shortAddr ? (
           <p>
             You are signed in as{" "}
-            <code className="font-mono text-emerald-400">{shortAddr}</code>.
+            <code className="font-mono text-emerald-600 dark:text-emerald-400">{shortAddr}</code>.
             Every action you take is approved by this account and recorded
             against the household shown above.
           </p>
@@ -148,8 +148,8 @@ export function Dashboard() {
       {/* Developer details — collapsed by default. Tucked at the bottom so */}
       {/* non-crypto users never see it unless they go looking.             */}
       {/* ----------------------------------------------------------------- */}
-      <details className="mt-6 rounded-lg border border-slate-800/70 bg-slate-900/30 text-xs text-slate-500">
-        <summary className="cursor-pointer select-none px-4 py-3 font-medium text-slate-400 hover:text-slate-300">
+      <details className="mt-6 rounded-lg border border-stone-200 dark:border-slate-800/70 bg-stone-100/50 dark:bg-slate-900/30 text-xs text-stone-500 dark:text-slate-500">
+        <summary className="cursor-pointer select-none px-4 py-3 font-medium text-stone-500 dark:text-slate-400 hover:text-stone-600 dark:hover:text-slate-300">
           Developer details
         </summary>
         <div className="grid gap-3 px-4 pb-4 sm:grid-cols-3">
@@ -178,12 +178,12 @@ function endpointLabel(endpoint: string): string {
 /** Small labeled value card used in the Developer details section. */
 function DevInfoCard({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-lg border border-slate-800 bg-slate-900/40 p-4">
-      <div className="text-[10px] uppercase tracking-wide text-slate-600">
+    <div className="rounded-lg border border-stone-200 dark:border-slate-800 bg-white dark:bg-slate-900/40 p-4">
+      <div className="text-[10px] uppercase tracking-wide text-stone-400 dark:text-slate-600">
         {label}
       </div>
       <div
-        className="mt-1 truncate text-sm font-medium text-slate-300"
+        className="mt-1 truncate text-sm font-medium text-stone-600 dark:text-slate-300"
         title={value}
       >
         {value}

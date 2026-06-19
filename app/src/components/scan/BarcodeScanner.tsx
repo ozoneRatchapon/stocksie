@@ -204,7 +204,7 @@ export function BarcodeScanner({ onScan }: BarcodeScannerProps) {
       <div
         id={elementId}
         className={
-          "overflow-hidden rounded-lg border border-slate-800 bg-slate-950 " +
+          "overflow-hidden rounded-lg border border-stone-200 dark:border-slate-800 bg-white dark:bg-slate-950 " +
           (status.kind === "scanning" ? "block" : "hidden")
         }
         aria-hidden={status.kind !== "scanning"}
@@ -250,7 +250,7 @@ function ScannerControls({ status, onStart, onStop }: ScannerControlsProps) {
   if (status.kind === "scanning") {
     return (
       <div className="flex flex-col gap-2">
-        <p className="text-xs text-slate-400">
+        <p className="text-xs text-stone-500 dark:text-slate-400">
           Point at a product barcode. It scans automatically.
         </p>
         <Button variant="ghost" onClick={onStop}>
@@ -262,8 +262,8 @@ function ScannerControls({ status, onStart, onStop }: ScannerControlsProps) {
 
   // error
   return (
-    <div className="flex flex-col gap-2 rounded-lg border border-amber-500/30 bg-amber-500/5 px-4 py-3">
-      <p className="text-xs leading-relaxed text-amber-200/90">
+    <div className="flex flex-col gap-2 rounded-lg border border-amber-500/30 bg-amber-50 dark:bg-amber-500/5 px-4 py-3">
+      <p className="text-xs leading-relaxed text-amber-700/90 dark:text-amber-200/90">
         {status.message}
       </p>
       <div className="flex items-center gap-2">

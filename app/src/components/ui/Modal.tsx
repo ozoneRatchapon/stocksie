@@ -77,7 +77,7 @@ export function Modal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-slate-950/70 p-4 backdrop-blur-sm sm:items-center"
+      className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-white dark:bg-slate-950/70 p-4 backdrop-blur-sm sm:items-center"
       // Click on the backdrop (not the panel) closes. The panel stops
       // propagation so clicks inside it don't bubble out.
       onMouseDown={(e) => {
@@ -90,23 +90,23 @@ export function Modal({
         aria-labelledby={titleId}
         aria-describedby={description ? descId : undefined}
         className={cn(
-          "relative my-8 w-full max-w-2xl rounded-xl border border-slate-800 bg-slate-900 shadow-2xl shadow-slate-950/50",
+          "relative my-8 w-full max-w-2xl rounded-xl border border-stone-200 dark:border-slate-800 bg-stone-100 dark:bg-slate-900 shadow-2xl shadow-stone-900/10 dark:shadow-slate-950/50",
           className,
         )}
       >
         {/* Header */}
-        <header className="flex items-start justify-between gap-4 border-b border-slate-800 px-5 py-4">
+        <header className="flex items-start justify-between gap-4 border-b border-stone-200 dark:border-slate-800 px-5 py-4">
           <div className="flex flex-col gap-1">
             <h2
               id={titleId}
-              className="text-sm font-semibold tracking-tight text-slate-100"
+              className="text-sm font-semibold tracking-tight text-stone-800 dark:text-slate-100"
             >
               {title}
             </h2>
             {description && (
               <p
                 id={descId}
-                className="max-w-prose text-xs leading-relaxed text-slate-400"
+                className="max-w-prose text-xs leading-relaxed text-stone-500 dark:text-slate-400"
               >
                 {description}
               </p>
@@ -116,7 +116,7 @@ export function Modal({
             type="button"
             onClick={onClose}
             aria-label="Close"
-            className="-mr-1 -mt-1 flex-shrink-0 rounded p-1.5 text-slate-400 transition hover:bg-slate-800 hover:text-slate-200"
+            className="-mr-1 -mt-1 flex-shrink-0 rounded p-1.5 text-stone-500 dark:text-slate-400 transition hover:bg-white dark:hover:bg-slate-800 hover:text-stone-700 dark:hover:text-slate-200"
           >
             <CloseIcon />
           </button>
@@ -127,7 +127,7 @@ export function Modal({
 
         {/* Footer */}
         {footer && (
-          <footer className="flex items-center justify-end gap-2 border-t border-slate-800 px-5 py-4">
+          <footer className="flex items-center justify-end gap-2 border-t border-stone-200 dark:border-slate-800 px-5 py-4">
             {footer}
           </footer>
         )}

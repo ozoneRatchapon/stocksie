@@ -33,7 +33,7 @@ export function Landing() {
       {/* Minimal header — logo + always-available sign-in affordance      */}
       {/* --------------------------------------------------------------- */}
       <header className="flex flex-wrap items-center justify-between gap-4">
-        <div className="flex items-center gap-2 text-xl font-semibold tracking-tight text-slate-100">
+        <div className="flex items-center gap-2 text-xl font-semibold tracking-tight text-stone-800 dark:text-slate-100">
           <span aria-hidden="true">🏠</span>
           Stocksie
         </div>
@@ -46,9 +46,9 @@ export function Landing() {
       <section className="mt-16 text-center">
         <h1 className="mx-auto max-w-3xl text-balance text-4xl font-bold tracking-tight text-slate-50 sm:text-5xl">
           Never run out —{" "}
-          <span className="text-emerald-400">and never double-buy</span>
+          <span className="text-emerald-600 dark:text-emerald-400">and never double-buy</span>
         </h1>
-        <p className="mx-auto mt-5 max-w-2xl text-pretty text-lg text-slate-400">
+        <p className="mx-auto mt-5 max-w-2xl text-pretty text-lg text-stone-500 dark:text-slate-400">
           Your family&rsquo;s shared list for household essentials. Everyone
           knows what&rsquo;s running low, what&rsquo;s already bought, and what
           to grab next.
@@ -57,11 +57,11 @@ export function Landing() {
           <button
             type="button"
             onClick={() => setVisible(true)}
-            className="rounded-xl bg-emerald-500 px-7 py-3 text-base font-semibold text-emerald-950 shadow-lg shadow-emerald-500/20 transition hover:bg-emerald-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
+            className="rounded-xl bg-emerald-500 px-7 py-3 text-base font-semibold text-emerald-950 shadow-lg shadow-emerald-500/20 transition hover:bg-emerald-500 dark:hover:bg-emerald-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 dark:focus-visible:ring-emerald-300 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-slate-950"
           >
             Get started &rarr;
           </button>
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-stone-500 dark:text-slate-500">
             Sign in with Phantom, Solflare, Backpack — or the built-in dev
             account to try it locally.
           </p>
@@ -72,7 +72,7 @@ export function Landing() {
       {/* Hook — three "what it helps with" cards                          */}
       {/* --------------------------------------------------------------- */}
       <section className="mt-20">
-        <h2 className="text-center text-sm font-semibold uppercase tracking-widest text-slate-500">
+        <h2 className="text-center text-sm font-semibold uppercase tracking-widest text-stone-500 dark:text-slate-500">
           What Stocksie helps with
         </h2>
         <div className="mt-8 grid gap-5 sm:grid-cols-3">
@@ -98,11 +98,11 @@ export function Landing() {
       {/* Example scenario — the Lee household                             */}
       {/* --------------------------------------------------------------- */}
       <section className="mt-20">
-        <div className="rounded-2xl border border-slate-800 bg-slate-900/40 p-8 sm:p-10">
-          <h2 className="text-center text-2xl font-bold tracking-tight text-slate-100">
+        <div className="rounded-2xl border border-stone-200 dark:border-slate-800 bg-white dark:bg-slate-900/40 p-8 sm:p-10">
+          <h2 className="text-center text-2xl font-bold tracking-tight text-stone-800 dark:text-slate-100">
             See it in action
           </h2>
-          <p className="mt-1 text-center text-sm text-slate-500">
+          <p className="mt-1 text-center text-sm text-stone-500 dark:text-slate-500">
             A typical week with the Lee household
           </p>
 
@@ -119,7 +119,7 @@ export function Landing() {
               body={
                 <>
                   Mom{" "}
-                  <strong className="text-slate-200">sets up Stocksie</strong>{" "}
+                  <strong className="text-stone-700 dark:text-slate-200">sets up Stocksie</strong>{" "}
                   and invites the family.
                 </>
               }
@@ -129,7 +129,7 @@ export function Landing() {
               body={
                 <>
                   Grandma notices the laundry detergent is almost empty and{" "}
-                  <strong className="text-slate-200">flags it</strong> on the
+                  <strong className="text-stone-700 dark:text-slate-200">flags it</strong> on the
                   shared list. 🧴
                 </>
               }
@@ -139,7 +139,7 @@ export function Landing() {
               body={
                 <>
                   Alex checks — turns out Dad{" "}
-                  <strong className="text-slate-200">
+                  <strong className="text-stone-700 dark:text-slate-200">
                     already grabbed one
                   </strong>{" "}
                   yesterday. No double-buy. ✅
@@ -151,7 +151,7 @@ export function Landing() {
               body={
                 <>
                   Mom adds it to the list and{" "}
-                  <strong className="text-slate-200">
+                  <strong className="text-stone-700 dark:text-slate-200">
                     approves the restock
                   </strong>
                   . 🛒
@@ -163,7 +163,7 @@ export function Landing() {
               body={
                 <>
                   Alex buys it and marks it done. The shared pot{" "}
-                  <strong className="text-slate-200">pays Alex back</strong> —
+                  <strong className="text-stone-700 dark:text-slate-200">pays Alex back</strong> —
                   no &ldquo;who owes who.&rdquo; 💸
                 </>
               }
@@ -173,7 +173,7 @@ export function Landing() {
               body={
                 <>
                   Everyone sees{" "}
-                  <strong className="text-slate-200">
+                  <strong className="text-stone-700 dark:text-slate-200">
                     what&rsquo;s stocked and what&rsquo;s next
                   </strong>{" "}
                   — at a glance. 📋
@@ -182,7 +182,7 @@ export function Landing() {
             />
           </ol>
 
-          <p className="mt-8 text-center text-sm text-slate-400">
+          <p className="mt-8 text-center text-sm text-stone-500 dark:text-slate-400">
             The cupboard stays stocked. The money stays fair. No spreadsheets.
             No &ldquo;who owes who&rdquo; texts.
           </p>
@@ -193,22 +193,22 @@ export function Landing() {
       {/* Final CTA                                                       */}
       {/* --------------------------------------------------------------- */}
       <section className="mt-20 text-center">
-        <h2 className="text-2xl font-bold tracking-tight text-slate-100">
+        <h2 className="text-2xl font-bold tracking-tight text-stone-800 dark:text-slate-100">
           Ready to set up your household?
         </h2>
-        <p className="mt-2 text-slate-400">
+        <p className="mt-2 text-stone-500 dark:text-slate-400">
           It takes a minute. Sign in, name your household, invite your family.
         </p>
         <button
           type="button"
           onClick={() => setVisible(true)}
-          className="mt-6 rounded-xl bg-emerald-500 px-7 py-3 text-base font-semibold text-emerald-950 shadow-lg shadow-emerald-500/20 transition hover:bg-emerald-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
+          className="mt-6 rounded-xl bg-emerald-500 px-7 py-3 text-base font-semibold text-emerald-950 shadow-lg shadow-emerald-500/20 transition hover:bg-emerald-500 dark:hover:bg-emerald-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 dark:focus-visible:ring-emerald-300 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-slate-950"
         >
           Get started &rarr;
         </button>
       </section>
 
-      <footer className="mt-16 border-t border-slate-800 pt-6 text-center text-xs text-slate-600">
+      <footer className="mt-16 border-t border-stone-200 dark:border-slate-800 pt-6 text-center text-xs text-stone-400 dark:text-slate-600">
         Stocksie runs on the Solana network. Your household&rsquo;s money lives
         in an account only you control.
       </footer>
@@ -229,14 +229,14 @@ function HookCard({
   badge?: string;
 }) {
   return (
-    <div className="rounded-2xl border border-slate-800 bg-slate-900/40 p-6">
+    <div className="rounded-2xl border border-stone-200 dark:border-slate-800 bg-white dark:bg-slate-900/40 p-6">
       <div className="text-3xl" aria-hidden="true">
         {icon}
       </div>
-      <h3 className="mt-4 text-lg font-semibold text-slate-100">{title}</h3>
-      <p className="mt-2 text-sm leading-relaxed text-slate-400">{body}</p>
+      <h3 className="mt-4 text-lg font-semibold text-stone-800 dark:text-slate-100">{title}</h3>
+      <p className="mt-2 text-sm leading-relaxed text-stone-500 dark:text-slate-400">{body}</p>
       {badge ? (
-        <span className="mt-4 inline-flex items-center rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-0.5 text-xs font-medium text-emerald-300">
+        <span className="mt-4 inline-flex items-center rounded-full border border-emerald-500/30 bg-emerald-50 dark:bg-emerald-500/10 px-2.5 py-0.5 text-xs font-medium text-emerald-600 dark:text-emerald-300">
           {badge}
         </span>
       ) : null}
@@ -247,10 +247,10 @@ function HookCard({
 /** A household member chip in the example scenario. */
 function Member({ name, role }: { name: string; role?: string }) {
   return (
-    <span className="inline-flex items-center gap-1.5 rounded-full border border-slate-700 bg-slate-900/60 px-3 py-1 text-xs text-slate-300">
+    <span className="inline-flex items-center gap-1.5 rounded-full border border-stone-300 dark:border-slate-700 bg-stone-100/80 dark:bg-slate-900/60 px-3 py-1 text-xs text-stone-600 dark:text-slate-300">
       <span aria-hidden="true">👤</span>
       <span className="font-medium">{name}</span>
-      {role ? <span className="text-slate-500">· {role}</span> : null}
+      {role ? <span className="text-stone-500 dark:text-slate-500">· {role}</span> : null}
     </span>
   );
 }
@@ -260,12 +260,12 @@ function Step({ n, body }: { n: number; body: React.ReactNode }) {
   return (
     <li className="flex items-start gap-4">
       <span
-        className="mt-0.5 flex h-7 w-7 flex-none items-center justify-center rounded-full bg-emerald-500/15 text-sm font-semibold text-emerald-300"
+        className="mt-0.5 flex h-7 w-7 flex-none items-center justify-center rounded-full bg-emerald-50 dark:bg-emerald-500/15 text-sm font-semibold text-emerald-600 dark:text-emerald-300"
         aria-hidden="true"
       >
         {n}
       </span>
-      <p className="text-base leading-relaxed text-slate-300">{body}</p>
+      <p className="text-base leading-relaxed text-stone-600 dark:text-slate-300">{body}</p>
     </li>
   );
 }

@@ -198,26 +198,26 @@ function StatCard({
   accent?: boolean;
 }) {
   return (
-    <div className="rounded-lg border border-slate-800 bg-slate-950/50 p-4">
-      <div className="text-xs uppercase tracking-wide text-slate-500">{label}</div>
+    <div className="rounded-lg border border-stone-200 dark:border-slate-800 bg-white dark:bg-slate-950/50 p-4">
+      <div className="text-xs uppercase tracking-wide text-stone-500 dark:text-slate-500">{label}</div>
       <div
         className={`mt-1 truncate font-mono text-lg font-semibold ${
-          accent ? 'text-emerald-400' : 'text-slate-100'
+          accent ? 'text-emerald-600 dark:text-emerald-400' : 'text-stone-800 dark:text-slate-100'
         }`}
       >
         {value}
       </div>
-      {sub && <div className="mt-0.5 text-xs text-slate-600">{sub}</div>}
+      {sub && <div className="mt-0.5 text-xs text-stone-400 dark:text-slate-600">{sub}</div>}
     </div>
   );
 }
 
 function MetaRow({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
   return (
-    <div className="flex items-center justify-between gap-3 rounded-lg border border-slate-800/70 bg-slate-950/40 px-4 py-2">
-      <span className="text-xs uppercase tracking-wide text-slate-500">{label}</span>
+    <div className="flex items-center justify-between gap-3 rounded-lg border border-stone-200 dark:border-slate-800/70 bg-stone-50/60 dark:bg-slate-950/40 px-4 py-2">
+      <span className="text-xs uppercase tracking-wide text-stone-500 dark:text-slate-500">{label}</span>
       <code
-        className={`truncate text-xs text-slate-400 ${mono ? 'font-mono' : ''}`}
+        className={`truncate text-xs text-stone-500 dark:text-slate-400 ${mono ? 'font-mono' : ''}`}
         title={value}
       >
         {value}
@@ -234,10 +234,10 @@ function MemberRoster({ members }: { members: MemberAccount[] }) {
   return (
     <div className="flex flex-col gap-2">
       <div className="flex items-center justify-between">
-        <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-300">
+        <h3 className="text-xs font-semibold uppercase tracking-wide text-stone-600 dark:text-slate-300">
           Members
         </h3>
-        <span className="text-xs text-slate-500">{members.length} active</span>
+        <span className="text-xs text-stone-500 dark:text-slate-500">{members.length} active</span>
       </div>
       {members.length === 0 ? (
         <EmptyState
@@ -246,9 +246,9 @@ function MemberRoster({ members }: { members: MemberAccount[] }) {
           compact
         />
       ) : (
-        <div className="overflow-hidden rounded-lg border border-slate-800">
+        <div className="overflow-hidden rounded-lg border border-stone-200 dark:border-slate-800">
           <table className="w-full text-sm">
-            <thead className="bg-slate-900/60 text-xs uppercase tracking-wide text-slate-500">
+            <thead className="bg-stone-100/80 dark:bg-slate-900/60 text-xs uppercase tracking-wide text-stone-500 dark:text-slate-500">
               <tr>
                 <th className="px-3 py-2 text-left font-medium">Member</th>
                 <th className="px-3 py-2 text-left font-medium">Role</th>
@@ -256,7 +256,7 @@ function MemberRoster({ members }: { members: MemberAccount[] }) {
                 <th className="px-3 py-2 text-left font-medium">Status</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800/70">
+            <tbody className="divide-y divide-stone-200 dark:divide-slate-800/70">
               {members.map((m) => (
                 <MemberRow key={m.publicKey.toBase58()} member={m} />
               ))}
@@ -274,19 +274,19 @@ function MemberRow({ member }: { member: MemberAccount }) {
   const isActive = member.account.active;
 
   return (
-    <tr className="bg-slate-950/30 hover:bg-slate-900/40">
-      <td className="px-3 py-2 font-mono text-xs text-slate-200" title={member.account.wallet.toBase58()}>
+    <tr className="bg-stone-50/50 dark:bg-slate-950/30 hover:bg-white dark:hover:bg-slate-900/40">
+      <td className="px-3 py-2 font-mono text-xs text-stone-700 dark:text-slate-200" title={member.account.wallet.toBase58()}>
         {shortPubkey(member.account.wallet)}
       </td>
       <td className="px-3 py-2">
         <RoleBadge role={role as Role} />
       </td>
-      <td className="px-3 py-2 text-right font-mono text-xs text-slate-300">{rewardPoints}</td>
+      <td className="px-3 py-2 text-right font-mono text-xs text-stone-600 dark:text-slate-300">{rewardPoints}</td>
       <td className="px-3 py-2">
         {isActive ? (
-          <Badge className="bg-emerald-500/15 text-emerald-300 ring-emerald-500/30">Active</Badge>
+          <Badge className="bg-emerald-50 dark:bg-emerald-500/15 text-emerald-600 dark:text-emerald-300 ring-emerald-500/30">Active</Badge>
         ) : (
-          <Badge className="bg-rose-500/15 text-rose-300 ring-rose-500/30">Inactive</Badge>
+          <Badge className="bg-rose-50 dark:bg-rose-500/15 text-rose-600 dark:text-rose-300 ring-rose-500/30">Inactive</Badge>
         )}
       </td>
     </tr>
@@ -301,10 +301,10 @@ function PurchaseLedger({ requests }: { requests: PurchaseRequestAccount[] }) {
   return (
     <div className="flex flex-col gap-2">
       <div className="flex items-center justify-between">
-        <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-300">
+        <h3 className="text-xs font-semibold uppercase tracking-wide text-stone-600 dark:text-slate-300">
           Shopping requests
         </h3>
-        <span className="text-xs text-slate-500">{requests.length} request(s)</span>
+        <span className="text-xs text-stone-500 dark:text-slate-500">{requests.length} request(s)</span>
       </div>
       {requests.length === 0 ? (
         <EmptyState
@@ -313,9 +313,9 @@ function PurchaseLedger({ requests }: { requests: PurchaseRequestAccount[] }) {
           compact
         />
       ) : (
-        <div className="overflow-hidden rounded-lg border border-slate-800">
+        <div className="overflow-hidden rounded-lg border border-stone-200 dark:border-slate-800">
           <table className="w-full text-sm">
-            <thead className="bg-slate-900/60 text-xs uppercase tracking-wide text-slate-500">
+            <thead className="bg-stone-100/80 dark:bg-slate-900/60 text-xs uppercase tracking-wide text-stone-500 dark:text-slate-500">
               <tr>
                 <th className="px-3 py-2 text-left font-medium">#</th>
                 <th className="px-3 py-2 text-left font-medium">Status</th>
@@ -325,7 +325,7 @@ function PurchaseLedger({ requests }: { requests: PurchaseRequestAccount[] }) {
                 <th className="px-3 py-2 text-right font-medium">Reward</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800/70">
+            <tbody className="divide-y divide-stone-200 dark:divide-slate-800/70">
               {requests.map((r) => (
                 <RequestRow key={r.publicKey.toBase58()} request={r} />
               ))}
@@ -345,19 +345,19 @@ function RequestRow({ request }: { request: PurchaseRequestAccount }) {
   const requestId = request.account.requestId.toString(10);
 
   return (
-    <tr className="bg-slate-950/30 hover:bg-slate-900/40">
-      <td className="px-3 py-2 font-mono text-xs text-slate-300">#{requestId}</td>
+    <tr className="bg-stone-50/50 dark:bg-slate-950/30 hover:bg-white dark:hover:bg-slate-900/40">
+      <td className="px-3 py-2 font-mono text-xs text-stone-600 dark:text-slate-300">#{requestId}</td>
       <td className="px-3 py-2">
         <StatusBadge status={status as Status} />
       </td>
-      <td className="px-3 py-2 font-mono text-xs text-slate-200" title={request.account.buyer.toBase58()}>
+      <td className="px-3 py-2 font-mono text-xs text-stone-700 dark:text-slate-200" title={request.account.buyer.toBase58()}>
         {shortPubkey(request.account.buyer)}
       </td>
-      <td className="px-3 py-2 text-right font-mono text-xs text-slate-300">{amountSol} SOL</td>
-      <td className="px-3 py-2 text-right font-mono text-xs text-slate-400">
+      <td className="px-3 py-2 text-right font-mono text-xs text-stone-600 dark:text-slate-300">{amountSol} SOL</td>
+      <td className="px-3 py-2 text-right font-mono text-xs text-stone-500 dark:text-slate-400">
         {reimbursedSol} SOL
       </td>
-      <td className="px-3 py-2 text-right font-mono text-xs text-emerald-300/80">{rewardEarned}</td>
+      <td className="px-3 py-2 text-right font-mono text-xs text-emerald-600/80 dark:text-emerald-300/80">{rewardEarned}</td>
     </tr>
   );
 }
@@ -368,7 +368,7 @@ function RequestRow({ request }: { request: PurchaseRequestAccount }) {
 
 function LoadingState() {
   return (
-    <div className="flex items-center gap-3 rounded-lg border border-slate-800 bg-slate-950/30 px-5 py-8 text-sm text-slate-400">
+    <div className="flex items-center gap-3 rounded-lg border border-stone-200 dark:border-slate-800 bg-stone-50/50 dark:bg-slate-950/30 px-5 py-8 text-sm text-stone-500 dark:text-slate-400">
       <Spinner />
       Loading your household…
     </div>
@@ -377,9 +377,9 @@ function LoadingState() {
 
 function ErrorState({ message, onRetry }: { message: string; onRetry: () => void }) {
   return (
-    <div className="flex flex-col gap-2 rounded-lg border border-rose-500/40 bg-rose-500/10 px-5 py-4">
-      <p className="text-sm font-medium text-rose-200">Couldn't load your household</p>
-      <p className="break-words text-xs text-rose-200/80">{message}</p>
+    <div className="flex flex-col gap-2 rounded-lg border border-rose-500/40 bg-rose-50 dark:bg-rose-500/10 px-5 py-4">
+      <p className="text-sm font-medium text-rose-700 dark:text-rose-200">Couldn't load your household</p>
+      <p className="break-words text-xs text-rose-700/80 dark:text-rose-200/80">{message}</p>
       <div>
         <Button variant="secondary" size="sm" onClick={onRetry}>
           Retry
@@ -400,12 +400,12 @@ function EmptyState({
 }) {
   return (
     <div
-      className={`flex flex-col gap-1 rounded-lg border border-dashed border-slate-700 bg-slate-950/30 ${
+      className={`flex flex-col gap-1 rounded-lg border border-dashed border-stone-300 dark:border-slate-700 bg-stone-50/50 dark:bg-slate-950/30 ${
         compact ? 'px-4 py-3' : 'px-5 py-6'
       }`}
     >
-      <p className="text-sm font-medium text-slate-300">{title}</p>
-      <p className="text-xs leading-relaxed text-slate-500">{body}</p>
+      <p className="text-sm font-medium text-stone-600 dark:text-slate-300">{title}</p>
+      <p className="text-xs leading-relaxed text-stone-500 dark:text-slate-500">{body}</p>
     </div>
   );
 }
@@ -457,7 +457,7 @@ function sortRequests(requests: PurchaseRequestAccount[]): PurchaseRequestAccoun
 
 function Spinner() {
   return (
-    <svg className="h-4 w-4 animate-spin text-slate-500" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+    <svg className="h-4 w-4 animate-spin text-stone-500 dark:text-slate-500" viewBox="0 0 24 24" fill="none" aria-hidden="true">
       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
       <path
         className="opacity-90"

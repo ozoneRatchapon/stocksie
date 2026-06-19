@@ -152,7 +152,7 @@ function ManageMembersSection() {
         label="Manage members"
         hint="Admin only. Sign in as the household admin (or set the admin address above to your account) to invite, remove, or change roles."
       >
-        <p className="rounded-lg border border-dashed border-slate-700 bg-slate-950/30 px-4 py-3 text-xs text-slate-400">
+        <p className="rounded-lg border border-dashed border-stone-300 dark:border-slate-700 bg-stone-50/50 dark:bg-slate-950/30 px-4 py-3 text-xs text-stone-500 dark:text-slate-400">
           You're not signed in as this household's admin. Only the admin can
           invite, remove, or change roles.
         </p>

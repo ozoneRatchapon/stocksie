@@ -38,13 +38,13 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 const VARIANT_CLASSES: Record<ButtonVariant, string> = {
   primary:
-    'bg-emerald-500 text-slate-950 hover:bg-emerald-400 focus-visible:outline-emerald-400 disabled:bg-emerald-500/40 disabled:text-slate-950/50',
+    'bg-emerald-500 text-slate-950 hover:bg-emerald-500 dark:hover:bg-emerald-400 focus-visible:outline-emerald-600 dark:focus-visible:outline-emerald-400 disabled:bg-emerald-500/40 disabled:text-slate-950/50',
   secondary:
-    'border border-slate-700 bg-slate-800 text-slate-100 hover:bg-slate-700 focus-visible:outline-slate-500 disabled:opacity-50',
+    'border border-stone-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-stone-800 dark:text-slate-100 hover:bg-stone-200 dark:hover:bg-slate-700 focus-visible:outline-stone-400 dark:focus-visible:outline-slate-500 disabled:opacity-50',
   danger:
-    'border border-rose-800 bg-rose-950/60 text-rose-200 hover:bg-rose-900/70 focus-visible:outline-rose-500 disabled:opacity-50',
+    'border border-rose-300 dark:border-rose-800 bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-200 hover:bg-rose-100 dark:hover:bg-rose-900/70 focus-visible:outline-rose-500 disabled:opacity-50',
   ghost:
-    'bg-transparent text-slate-300 hover:bg-slate-800 hover:text-slate-100 focus-visible:outline-slate-500 disabled:opacity-50',
+    'bg-transparent text-stone-600 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-800 hover:text-stone-800 dark:hover:text-slate-100 focus-visible:outline-stone-400 dark:focus-visible:outline-slate-500 disabled:opacity-50',
 };
 
 const SIZE_CLASSES: Record<ButtonSize, string> = {
