@@ -62,6 +62,7 @@ export function PurchasePanel() {
   return (
     <Panel
       title="Shopping"
+      icon="🛒"
       description="Report something the household needs, then approve it, decline it, mark it as bought, pay the buyer back, or close it. The full lifecycle (waiting → approved → bought → paid back, or declined) runs through these five actions."
     >
       <ConnectGate>

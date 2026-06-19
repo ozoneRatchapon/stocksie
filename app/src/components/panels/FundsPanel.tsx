@@ -40,6 +40,7 @@ export function FundsPanel() {
   return (
     <Panel
       title="Money"
+      icon="💰"
       description="Add money to the shared household budget, or — if you're the admin — move money back to your own account. Day-to-day shopping goes through the request + pay-back flow, not through withdrawals."
     >
       <ConnectGate>

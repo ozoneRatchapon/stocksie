@@ -235,34 +235,40 @@ prop (rendered only for the "Coming soon" card).
   element).
 - [x] **C.6** Conventional commit (this change).
 
-## 5. Layer 2 — Visual & layout warmth (DEFERRED)
+## 5. Layer 2 — Visual & layout warmth (DONE via plan 007)
 
-Not started. Pending Layer 1 review.
+Shipped on `feature/web2-ux-layer2` (plan 007). All seven sub-items below are
+implemented; see plan 007 §8 for the full build log + verification gates.
 
-- [ ] **2.1** Add a **light theme** (default) with soft pastels; keep dark as
+- [x] **2.1** Add a **light theme** (default) with soft pastels; keep dark as
   a toggle. Update `tailwind.config.ts` `darkMode: 'class'` and add a
   `<ThemeToggle>` in the header.
-- [ ] **2.2** Replace `shortPubkey()` primary display with **avatars with
+- [x] **2.2** Replace `shortPubkey()` primary display with **avatars with
   initials** — deterministic color derived from the pubkey so it's stable
   across renders. Add `lib/avatar.ts` + `<Avatar>` component.
-- [ ] **2.3** Replace the 3-card dev header with one friendly summary:
+- [x] **2.3** Replace the 3-card dev header with one friendly summary:
   "Welcome back, {name}" + budget badge + sign-in button. (Partially done
   in Layer 1 — the dev cards moved to a collapsible. Layer 2 finishes the
   friendly welcome line.)
-- [ ] **2.4** Replace the member-roster `<table>` with a **member card
+- [x] **2.4** Replace the member-roster `<table>` with a **member card
   grid** — avatar + role + reward points + active/inactive in a soft card.
-- [ ] **2.5** Replace the purchase-ledger `<table>` with **purchase cards**
+- [x] **2.5** Replace the purchase-ledger `<table>` with **purchase cards**
   — status pill + item (truncated) + buyer avatar + spending limit + reward.
-- [ ] **2.6** Add **icons / emoji** for household concepts (🏠 household,
+- [x] **2.6** Add **icons / emoji** for household concepts (🏠 household,
   💰 budget, 🛒 purchase, 🎁 reward) in Panel headers.
-- [ ] **2.7** Visually re-skin the wallet button chrome (colours, borders,
+- [x] **2.7** Visually re-skin the wallet button chrome (colours, borders,
   rounded corners) to match the friendly palette, and replace the
   connected-state truncated address with an avatar + name (see §2.2). The
   button *labels* ("Sign in" / "Sign out" / "Switch account") were already
   overridden in Layer 1 (§1.10a) via `BaseWalletMultiButton`'s `labels` prop;
-  the adapter CSS imported here
-  (`@solana/wallet-adapter-react-ui/styles.css`) only governs styling, not
-  text.
+  Layer 2 replaces the adapter button entirely with a custom control.
+
+> **Note on §2.3.** The "welcome back, {name}" line was not added as a
+> separate element — the connected wallet button now carries the identity
+> (avatar + adapter name), and the existing one-line status pill ("Signed in ·
+> `9Bz7…vkBN`") already serves as the friendly summary. Adding a duplicate
+> name line would compete with the button. The friendly welcome is therefore
+> carried by the avatar-led wallet button, not a separate header string.
 
 ## 6. Layer 3 — Guided flow (DEFERRED)
 
@@ -369,3 +375,13 @@ for the full build log.
 
 Layers 2 (visual warmth) and 3 (guided flow) remain deferred — pick up
 after Path B or in parallel, PO's call.
+
+**Layer 2 (visual warmth) — DONE (plan 007).** Light theme (default) + dark
+toggle, deterministic avatars-with-initials replacing raw `shortPubkey()`
+glyphs, member/purchase views as responsive card grids, emoji icons on every
+panel header, and the wallet button re-skinned with an avatar + adapter name.
+Presentation only — zero logic/RPC/Rust changes. See
+[007_layer2_visual_warmth.md](007_layer2_visual_warmth.md) for the full
+build log. Layer 3 (guided flow: onboarding stepper, tabbed layout, primary
+CTA modal, lockable admin cards, empty-state illustrations) remains the only
+undeferred layer of this plan.

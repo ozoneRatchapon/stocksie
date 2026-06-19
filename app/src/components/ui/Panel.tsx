@@ -15,6 +15,9 @@ import { cn } from "@/lib/cn";
 export type PanelProps = {
   /** Section heading. Rendered in a semibold, slightly larger style. */
   title: string;
+  /** Optional icon rendered before the title (typically an emoji per plan 005
+   * §5.6 — 🏠 💰 🛒 etc.). Ignored if the header is not shown. */
+  icon?: ReactNode;
   /** Optional one-line description shown under the title in muted text. Sets
    * context for the forms below (e.g. "Owner-only membership controls"). */
   description?: ReactNode;
@@ -46,6 +49,7 @@ export type PanelProps = {
  */
 export function Panel({
   title,
+  icon,
   description,
   actions,
   badge,
@@ -68,6 +72,11 @@ export function Panel({
         <header className="flex flex-wrap items-start justify-between gap-3 border-b border-stone-200 dark:border-slate-800 px-5 py-4">
           <div className="flex flex-col gap-1">
             <div className="flex items-center gap-2">
+              {icon && (
+                <span className="text-base" aria-hidden="true">
+                  {icon}
+                </span>
+              )}
               <h2 className="text-sm font-semibold tracking-tight text-stone-800 dark:text-slate-100">
                 {title}
               </h2>

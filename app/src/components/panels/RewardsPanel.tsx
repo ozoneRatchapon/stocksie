@@ -40,6 +40,7 @@ export function RewardsPanel() {
   return (
     <Panel
       title="Rewards"
+      icon="🎁"
       description="Give reward points to a member (admin or approver) or check your own reward score (any member). The reason you type is kept private — only a scrambled fingerprint is recorded."
     >
       <ConnectGate>

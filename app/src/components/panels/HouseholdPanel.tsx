@@ -51,6 +51,7 @@ export function HouseholdPanel() {
   return (
     <Panel
       title="Household"
+      icon="🏠"
       description="Set up your household (you become its admin) and manage who's in it. Inviting, removing, and role changes are admin-only."
     >
       <ConnectGate requireHousehold={false}>

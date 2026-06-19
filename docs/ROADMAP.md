@@ -66,6 +66,13 @@ hooks). Documented here so the roadmap reflects what actually ships today.
 - [x] **Barcode scanner** — `/scan` route wraps `html5-qrcode` with
       dynamic-import (`ssr:false`) isolation so its heavy dep stays out of the
       landing/shelf First Load (plan 006 §C).
+- [x] **Visual warmth (web2 Layer 2)** — light theme (default) + dark toggle,
+      deterministic avatars-with-initials replacing raw `shortPubkey()` glyphs,
+      member/purchase views as responsive card grids (not `<table>`s), and
+      emoji icons on every panel header. Light is warm `stone-*`; dark keeps
+      the original slate palette. The connected wallet button shows the avatar
+      + adapter name instead of a truncated address. Presentation only — zero
+      logic / RPC / Rust changes (plan 007).
 
 ---
 

@@ -45,6 +45,7 @@ export function ReimbursePanel() {
   return (
     <Panel
       title="Pay back"
+      icon="💸"
       description="Pay a buyer back for something they bought on behalf of the household. Admin or approver only. The buyer must match the request's recorded buyer, and the amount can't exceed the request's spending limit (or the 0.5 SOL safety limit)."
     >
       <ConnectGate>

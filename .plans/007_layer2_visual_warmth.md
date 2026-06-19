@@ -312,20 +312,97 @@ but the lowest-risk by logic — it's class-string edits.
 
 ## 7. Bundle size tracking (fill in per phase)
 
-| Phase | `/` First Load | `/shelf` | `/scan` | Dashboard | Notes |
-|---|---|---|---|---|---|
-| Baseline (develop @ 73c826a) | 73 kB / 270 kB | 117 kB | 109 kB | (part of `/`) | From plan 006 §7 |
-| A | — | — | — | — | (fill in) |
-| B | — | — | — | — | (fill in) |
-| C | — | — | — | — | (fill in) |
-| D | — | — | — | — | (fill in) |
-| E | — | — | — | — | (fill in) |
-| F | — | — | — | — | (fill in) |
+| Phase | `/` First Load | `/shelf` | `/scan` | Notes |
+|---|---|---|---|---|
+| Baseline (develop @ 73c826a) | 73.1 kB / 270 kB | 117 kB | 109 kB | From plan 006 §7 |
+| A | 73.1 kB / 270 kB | 117 kB | 109 kB | No page imports theme.ts yet |
+| B | 73.1 kB / 270 kB | 117 kB | 109 kB | No page imports Avatar yet |
+| C | 73.6 kB / 270 kB | 117 kB | 109 kB | +0.5 kB: ThemeToggle in dashboard header |
+| D | 73.9 kB / 271 kB | 118 kB | 109 kB | +0.3 kB: extra `dark:` class strings |
+| E | 74.4 kB / 271 kB | 118 kB | 109 kB | +0.5 kB: Avatar now in the dashboard graph |
+| F | 75.4 kB / 271 kB | 118 kB | 109 kB | +1.0 kB: custom WalletButton + dropdown |
+
+**Total growth: `/` 73.1 → 75.4 kB (+2.3 kB, +3.1%)** for a full theme system,
+avatars, card grids, panel icons, and a custom wallet control. All routes
+stay well under the 5 kB-per-phase flag threshold from §6 gate #2. The
+growth is one-time (foundation primitives now in the shared chunk); future
+Layer 3 work won't re-pay this cost.
 
 ## 8. Status
 
-**Not started.** Awaiting go-ahead to cut `feature/web2-ux-layer2` from
-`develop` @ `73c826a` and begin Phase A.
+**ALL PHASES DONE (A + B + C + D + E + F)** on
+`feature/web2-ux-layer2` (cut from `develop` @ `73c826a`). No Rust files
+touched in the entire plan — every change is under `app/`, `docs/`, or the
+plan files themselves.
+
+- **Phase A** — theme system, no runtime dep: `lib/theme.ts`
+  (`getTheme`/`setTheme`/`useTheme` hook, SSR-safe),
+  `app/theme-script.ts` (blocking inline script injected as the first child
+  of `<body>`, applies `.dark` before paint — no FOUC), `layout.tsx` inject,
+  `tailwind.config.ts` `darkMode: 'class'`, `globals.css` body flipped to
+  light-default + dark variant. 7 tests.
+- **Phase B** — avatar primitive, pure + SSR-safe: `lib/avatar.ts`
+  (`avatarColor` via FNV-1a hash mod 8-entry pastel palette, no
+  `Math.random`/`Date`/`window`; `avatarInitials` base58-aware) +
+  `components/ui/Avatar.tsx`. 11 tests.
+- **Phase C** — `components/ui/ThemeToggle.tsx` (sun/moon icon button,
+  mount-guard returns a same-size skeleton pre-mount so the header row never
+  shifts), wired into the Dashboard header between Scan and WalletButton.
+- **Phase D** — color migration: every dark-only Tailwind class in the
+  component tree now has a light-mode base + `dark:` variant. Applied via a
+  one-shot token-replacer script (class strings only — no logic, no
+  formatting, no JSX structure changes). 21 files, +220/−220 (perfectly
+  symmetric). Slate → warm stone neutrals; emerald/rose/amber/sky/violet/zinc
+  status palettes mirrored.
+- **Phase E** — tables → card grids in `StateView.tsx`: `MemberRoster` →
+  3/2/1-col responsive grid of `MemberCard` (avatar + role + reward points +
+  status pill + short pubkey); `PurchaseLedger` → 2/1-col grid of
+  `PurchaseCard` (`#id` + status pill + buyer avatar + 3-cell money grid).
+  Old `MemberRow`/`RequestRow` `<tr>` helpers deleted; `MoneyCell` helper
+  added. Every data column preserved — reflowed, not dropped. Full pubkey
+  one hover away via avatar `title`.
+- **Phase F** (the closeout):
+  - **F.1** `WalletButton.tsx` fully re-skinned: custom control replacing
+    `BaseWalletMultiButton`. Disconnected → primary "Sign in" button (opens
+    the wallet modal). Connected → avatar + adapter name pill with a
+    dropdown (Copy address / Switch account / Sign out). Same mount-guard
+    pattern to avoid the wallet-standard hydration mismatch.
+  - **F.2** `Panel.tsx` gained an optional `icon?` prop rendered before the
+    title.
+  - **F.3** Icons wired to the 5 panels: 🏠 Household, 💰 Money, 🛒 Shopping,
+    💸 Pay back, 🎁 Rewards (per §4.5).
+  - **F.4** `docs/ROADMAP.md` §1 "Off-chain client surface" gained a
+    "Visual warmth (web2 Layer 2) — shipped post-MVP" entry.
+  - **F.5** `.plans/005_web2_ux.md` §5 marked Layer 2 DONE (all 7 sub-items
+    checked); §9 gained a Layer 2 DONE note pointing back here.
+  - **F.6** this status update + §7 bundle table + handover doc.
+
+**Gates:** `pnpm -C app typecheck` → exit 0; `pnpm -C app build` → exit 0
+(`/` 75.4 kB / 271 kB First Load, `/shelf` 118 kB, `/scan` 109 kB);
+`pnpm -C app test` → **50/50** (10 bestValue + 6 pendingSnapshots + 10
+CostSaving + 6 shelf + 7 theme + 11 avatar); `cargo check -p stocksie` →
+exit 0 (no Rust touched). Scope audit clean: zero diffs in `lib/`
+(except the new `theme.ts` + `avatar.ts` + their tests), `hooks/`,
+`adapters/`, or `programs/`. Logic audit clean: zero new `.methods.` /
+`accountsStrict` / `derivePda` / `pda(` calls.
+
+**Open questions resolved by default (§9):** Q1 (inline script, not
+`next-themes`), Q2 (rounded-square avatars), Q3 (8-pair palette), Q4 (single
+responsive card grid, not a desktop-table/mobile-card hybrid).
+
+**One judgment call worth flagging (§2.3):** the plan called for a separate
+"Welcome back, {name}" header line. Not added — the avatar-led wallet
+button already carries identity (avatar + adapter name), and the existing
+status pill ("Signed in · `9Bz7…vkBN`") already serves as the friendly
+summary. A duplicate name line would compete with the button. Documented in
+plan 005 §5.
+
+**Remaining deferred:** Plan 005 Layer 3 (guided flow: onboarding stepper,
+tabbed layout, primary CTA modal, lockable admin cards, empty-state
+illustrations) — a separate future plan.
+
+**Git hygiene before merge:** fast-forward `develop` + `main` to
+`feature/web2-ux-layer2` once reviewed.
 
 ## 9. Open questions (need PO input before/during build)
 
