@@ -39,6 +39,7 @@ import {
   type Status,
 } from "@/lib/types";
 import { Panel } from "@/components/ui/Panel";
+import { Avatar } from "@/components/ui/Avatar";
 import { Badge, RoleBadge, StatusBadge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Field } from "@/components/ui/Field";
@@ -304,61 +305,64 @@ function MemberRoster({ members }: { members: MemberAccount[] }) {
           compact
         />
       ) : (
-        <div className="overflow-hidden rounded-lg border border-stone-200 dark:border-slate-800">
-          <table className="w-full text-sm">
-            <thead className="bg-stone-100/80 dark:bg-slate-900/60 text-xs uppercase tracking-wide text-stone-500 dark:text-slate-500">
-              <tr>
-                <th className="px-3 py-2 text-left font-medium">Member</th>
-                <th className="px-3 py-2 text-left font-medium">Role</th>
-                <th className="px-3 py-2 text-right font-medium">
-                  Reward points
-                </th>
-                <th className="px-3 py-2 text-left font-medium">Status</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-stone-200 dark:divide-slate-800/70">
-              {members.map((m) => (
-                <MemberRow key={m.publicKey.toBase58()} member={m} />
-              ))}
-            </tbody>
-          </table>
+        // Responsive card grid: 1 col mobile, 2 col sm, 3 col lg. Cards
+        // replace the old <table> so each member reads as a person (avatar +
+        // role + points + status) rather than a row in a database view.
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {members.map((m) => (
+            <MemberCard key={m.publicKey.toBase58()} member={m} />
+          ))}
         </div>
       )}
     </div>
   );
 }
 
-function MemberRow({ member }: { member: MemberAccount }) {
+/** Single member rendered as a soft card: avatar (deterministic color +
+ * initials) leads, then role + reward points + status pill, then the short
+ * pubkey as a muted secondary line. The full pubkey is exposed via the
+ * avatar's `title` (one hover away) — same power-user affordance the old
+ * `<td title={...}>` provided. */
+function MemberCard({ member }: { member: MemberAccount }) {
   const role = roleFromAnchor(member.account.role) ?? "guest";
   const rewardPoints = member.account.rewardPoints.toString(10);
   const isActive = member.account.active;
+  const walletAddr = member.account.wallet.toBase58();
 
   return (
-    <tr className="bg-stone-50/50 dark:bg-slate-950/30 hover:bg-white dark:hover:bg-slate-900/40">
-      <td
-        className="px-3 py-2 font-mono text-xs text-stone-700 dark:text-slate-200"
-        title={member.account.wallet.toBase58()}
-      >
-        {shortPubkey(member.account.wallet)}
-      </td>
-      <td className="px-3 py-2">
-        <RoleBadge role={role as Role} />
-      </td>
-      <td className="px-3 py-2 text-right font-mono text-xs text-stone-600 dark:text-slate-300">
-        {rewardPoints}
-      </td>
-      <td className="px-3 py-2">
-        {isActive ? (
-          <Badge className="bg-emerald-50 dark:bg-emerald-500/15 text-emerald-600 dark:text-emerald-300 ring-emerald-500/30">
-            Active
-          </Badge>
-        ) : (
-          <Badge className="bg-rose-50 dark:bg-rose-500/15 text-rose-600 dark:text-rose-300 ring-rose-500/30">
-            Inactive
-          </Badge>
-        )}
-      </td>
-    </tr>
+    <div className="flex flex-col gap-3 rounded-lg border border-stone-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-950/40">
+      <div className="flex items-center gap-3">
+        <Avatar seed={walletAddr} size="lg" title={walletAddr} />
+        <div className="flex min-w-0 flex-col gap-1">
+          <RoleBadge role={role as Role} />
+          {isActive ? (
+            <Badge className="bg-emerald-50 text-emerald-600 ring-emerald-500/30 dark:bg-emerald-500/15 dark:text-emerald-300">
+              Active
+            </Badge>
+          ) : (
+            <Badge className="bg-rose-50 text-rose-600 ring-rose-500/30 dark:bg-rose-500/15 dark:text-rose-300">
+              Inactive
+            </Badge>
+          )}
+        </div>
+      </div>
+      <div className="flex items-center justify-between gap-2 border-t border-stone-200 pt-3 dark:border-slate-800">
+        <div className="flex flex-col">
+          <span className="text-[10px] uppercase tracking-wide text-stone-400 dark:text-slate-600">
+            Reward points
+          </span>
+          <span className="font-mono text-sm font-semibold text-stone-700 dark:text-slate-200">
+            {rewardPoints}
+          </span>
+        </div>
+        <code
+          className="truncate font-mono text-[11px] text-stone-500 dark:text-slate-500"
+          title={walletAddr}
+        >
+          {shortPubkey(member.account.wallet)}
+        </code>
+      </div>
+    </div>
   );
 }
 
@@ -384,63 +388,89 @@ function PurchaseLedger({ requests }: { requests: PurchaseRequestAccount[] }) {
           compact
         />
       ) : (
-        <div className="overflow-hidden rounded-lg border border-stone-200 dark:border-slate-800">
-          <table className="w-full text-sm">
-            <thead className="bg-stone-100/80 dark:bg-slate-900/60 text-xs uppercase tracking-wide text-stone-500 dark:text-slate-500">
-              <tr>
-                <th className="px-3 py-2 text-left font-medium">#</th>
-                <th className="px-3 py-2 text-left font-medium">Status</th>
-                <th className="px-3 py-2 text-left font-medium">Buyer</th>
-                <th className="px-3 py-2 text-right font-medium">
-                  Spending limit
-                </th>
-                <th className="px-3 py-2 text-right font-medium">Paid back</th>
-                <th className="px-3 py-2 text-right font-medium">Reward</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-stone-200 dark:divide-slate-800/70">
-              {requests.map((r) => (
-                <RequestRow key={r.publicKey.toBase58()} request={r} />
-              ))}
-            </tbody>
-          </table>
+        // Responsive card grid: 1 col mobile, 2 col lg. Each request reads as
+        // a shopping item (status + buyer avatar + the three money fields)
+        // rather than a row in a ledger table.
+        <div className="grid gap-3 lg:grid-cols-2">
+          {requests.map((r) => (
+            <PurchaseCard key={r.publicKey.toBase58()} request={r} />
+          ))}
         </div>
       )}
     </div>
   );
 }
 
-function RequestRow({ request }: { request: PurchaseRequestAccount }) {
+/** Single purchase request rendered as a card: header row with `#id` + status
+ * pill, then the buyer (avatar + short pubkey), then a 3-cell mini-grid for
+ * the money fields (spending limit / paid back / reward). Full buyer pubkey
+ * is one hover away via the avatar's `title`. */
+function PurchaseCard({ request }: { request: PurchaseRequestAccount }) {
   const status = statusFromAnchor(request.account.status) ?? "pending";
   const amountSol = lamportsToSol(request.account.amountLamports);
   const reimbursedSol = lamportsToSol(request.account.reimbursedAmount);
   const rewardEarned = request.account.rewardEarned.toString(10);
   const requestId = request.account.requestId.toString(10);
+  const buyerAddr = request.account.buyer.toBase58();
 
   return (
-    <tr className="bg-stone-50/50 dark:bg-slate-950/30 hover:bg-white dark:hover:bg-slate-900/40">
-      <td className="px-3 py-2 font-mono text-xs text-stone-600 dark:text-slate-300">
-        #{requestId}
-      </td>
-      <td className="px-3 py-2">
+    <div className="flex flex-col gap-3 rounded-lg border border-stone-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-950/40">
+      <div className="flex items-center justify-between gap-2">
+        <code className="font-mono text-xs font-semibold text-stone-600 dark:text-slate-300">
+          #{requestId}
+        </code>
         <StatusBadge status={status as Status} />
-      </td>
-      <td
-        className="px-3 py-2 font-mono text-xs text-stone-700 dark:text-slate-200"
-        title={request.account.buyer.toBase58()}
+      </div>
+      <div className="flex items-center gap-2 border-t border-stone-200 pt-3 dark:border-slate-800">
+        <Avatar seed={buyerAddr} size="sm" title={buyerAddr} />
+        <span className="text-[10px] uppercase tracking-wide text-stone-400 dark:text-slate-600">
+          Buyer
+        </span>
+        <code
+          className="truncate font-mono text-[11px] text-stone-500 dark:text-slate-500"
+          title={buyerAddr}
+        >
+          {shortPubkey(request.account.buyer)}
+        </code>
+      </div>
+      <div className="grid grid-cols-3 gap-2 border-t border-stone-200 pt-3 dark:border-slate-800">
+        <MoneyCell label="Spending limit" value={`${amountSol} SOL`} />
+        <MoneyCell label="Paid back" value={`${reimbursedSol} SOL`} muted />
+        <MoneyCell label="Reward" value={rewardEarned} accent />
+      </div>
+    </div>
+  );
+}
+
+/** A labeled money/value cell used in the purchase card's mini-grid. */
+function MoneyCell({
+  label,
+  value,
+  muted,
+  accent,
+}: {
+  label: string;
+  value: string;
+  muted?: boolean;
+  accent?: boolean;
+}) {
+  return (
+    <div className="flex flex-col gap-0.5">
+      <span className="text-[10px] uppercase tracking-wide text-stone-400 dark:text-slate-600">
+        {label}
+      </span>
+      <span
+        className={`truncate font-mono text-xs ${
+          accent
+            ? "font-semibold text-emerald-600 dark:text-emerald-300"
+            : muted
+            ? "text-stone-500 dark:text-slate-400"
+            : "text-stone-600 dark:text-slate-300"
+        }`}
       >
-        {shortPubkey(request.account.buyer)}
-      </td>
-      <td className="px-3 py-2 text-right font-mono text-xs text-stone-600 dark:text-slate-300">
-        {amountSol} SOL
-      </td>
-      <td className="px-3 py-2 text-right font-mono text-xs text-stone-500 dark:text-slate-400">
-        {reimbursedSol} SOL
-      </td>
-      <td className="px-3 py-2 text-right font-mono text-xs text-emerald-600/80 dark:text-emerald-300/80">
-        {rewardEarned}
-      </td>
-    </tr>
+        {value}
+      </span>
+    </div>
   );
 }
 
