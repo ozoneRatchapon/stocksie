@@ -9,8 +9,8 @@
 // Pure presentational — no client-only imports, no state. Pulled into the
 // client graph by its `'use client'` panel parents and rendered there.
 
-import type { ReactNode } from 'react';
-import { cn } from '@/lib/cn';
+import type { ReactNode } from "react";
+import { cn } from "@/lib/cn";
 
 export type PanelProps = {
   /** Section heading. Rendered in a semibold, slightly larger style. */
@@ -59,26 +59,34 @@ export function Panel({
     <section
       id={id}
       className={cn(
-        'overflow-hidden rounded-xl border border-stone-200 dark:border-slate-800 bg-white dark:bg-slate-900/40',
-        'shadow-lg shadow-stone-900/5 dark:shadow-slate-950/20',
-        className,
+        "overflow-hidden rounded-xl border border-stone-200 dark:border-slate-800 bg-white dark:bg-slate-900/40",
+        "shadow-lg shadow-stone-900/5 dark:shadow-slate-950/20",
+        className
       )}
     >
       {showHeader && (
         <header className="flex flex-wrap items-start justify-between gap-3 border-b border-stone-200 dark:border-slate-800 px-5 py-4">
           <div className="flex flex-col gap-1">
             <div className="flex items-center gap-2">
-              <h2 className="text-sm font-semibold tracking-tight text-stone-800 dark:text-slate-100">{title}</h2>
+              <h2 className="text-sm font-semibold tracking-tight text-stone-800 dark:text-slate-100">
+                {title}
+              </h2>
               {badge}
             </div>
             {description && (
-              <p className="max-w-prose text-xs leading-relaxed text-stone-500 dark:text-slate-400">{description}</p>
+              <p className="max-w-prose text-xs leading-relaxed text-stone-500 dark:text-slate-400">
+                {description}
+              </p>
             )}
           </div>
-          {actions && <div className="flex shrink-0 items-center gap-2">{actions}</div>}
+          {actions && (
+            <div className="flex shrink-0 items-center gap-2">{actions}</div>
+          )}
         </header>
       )}
-      <div className={cn('flex flex-col gap-4 p-5', bodyClassName)}>{children}</div>
+      <div className={cn("flex flex-col gap-4 p-5", bodyClassName)}>
+        {children}
+      </div>
     </section>
   );
 }
@@ -100,14 +108,20 @@ export function SubPanel({ label, hint, children, className }: SubPanelProps) {
   return (
     <div
       className={cn(
-        'rounded-lg border border-stone-200 dark:border-slate-800/80 bg-stone-50/60 dark:bg-slate-950/40 p-4',
-        'flex flex-col gap-3',
-        className,
+        "rounded-lg border border-stone-200 dark:border-slate-800/80 bg-stone-50/60 dark:bg-slate-950/40 p-4",
+        "flex flex-col gap-3",
+        className
       )}
     >
       <div className="flex flex-col gap-0.5">
-        <h3 className="text-xs font-semibold uppercase tracking-wide text-stone-600 dark:text-slate-300">{label}</h3>
-        {hint && <p className="text-xs leading-relaxed text-stone-500 dark:text-slate-500">{hint}</p>}
+        <h3 className="text-xs font-semibold uppercase tracking-wide text-stone-600 dark:text-slate-300">
+          {label}
+        </h3>
+        {hint && (
+          <p className="text-xs leading-relaxed text-stone-500 dark:text-slate-500">
+            {hint}
+          </p>
+        )}
       </div>
       {children}
     </div>
