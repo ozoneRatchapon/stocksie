@@ -40,7 +40,8 @@ import {
 } from "@/lib/types";
 import { Panel } from "@/components/ui/Panel";
 import { Avatar } from "@/components/ui/Avatar";
-import { Badge, RoleBadge, StatusBadge } from "@/components/ui/Badge";
+import { Badge, RoleBadge } from "@/components/ui/Badge";
+import { StatusStepper } from "@/components/ui/StatusStepper";
 import { Button } from "@/components/ui/Button";
 import { Field } from "@/components/ui/Field";
 
@@ -235,15 +236,21 @@ function StatCard({
   accent?: boolean;
 }) {
   return (
-    <div className="rounded-lg border border-stone-200 dark:border-slate-800 bg-white dark:bg-slate-950/50 p-4">
+    <div
+      className={
+        accent
+          ? "rounded-xl border border-emerald-500/30 bg-gradient-to-br from-emerald-50 to-white p-4 dark:border-emerald-500/30 dark:from-emerald-500/10 dark:to-slate-950/50"
+          : "rounded-xl border border-stone-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-950/50"
+      }
+    >
       <div className="text-xs uppercase tracking-wide text-stone-500 dark:text-slate-500">
         {label}
       </div>
       <div
-        className={`mt-1 truncate font-mono text-lg font-semibold ${
+        className={`mt-1 truncate font-mono font-semibold ${
           accent
-            ? "text-emerald-600 dark:text-emerald-400"
-            : "text-stone-800 dark:text-slate-100"
+            ? "text-2xl text-emerald-600 dark:text-emerald-400"
+            : "text-lg text-stone-800 dark:text-slate-100"
         }`}
       >
         {value}
@@ -414,12 +421,12 @@ function PurchaseCard({ request }: { request: PurchaseRequestAccount }) {
   const buyerAddr = request.account.buyer.toBase58();
 
   return (
-    <div className="flex flex-col gap-3 rounded-lg border border-stone-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-950/40">
-      <div className="flex items-center justify-between gap-2">
+    <div className="flex flex-col gap-3 rounded-xl border border-stone-200 bg-gradient-to-br from-white to-stone-50/40 p-4 dark:border-slate-800 dark:bg-slate-950/40">
+      <div className="flex flex-wrap items-center justify-between gap-2">
         <code className="font-mono text-xs font-semibold text-stone-600 dark:text-slate-300">
           #{requestId}
         </code>
-        <StatusBadge status={status as Status} />
+        <StatusStepper status={status as Status} />
       </div>
       <div className="flex items-center gap-2 border-t border-stone-200 pt-3 dark:border-slate-800">
         <Avatar seed={buyerAddr} size="sm" title={buyerAddr} />
