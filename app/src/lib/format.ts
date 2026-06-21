@@ -106,6 +106,35 @@ export function shortPubkey(
 // ---------------------------------------------------------------------------
 
 /**
+ * Detect the system program's `Transfer: insufficient lamports X, need Y` log
+ * line and rewrite it as a SOL-denominated, actionable message.
+ *
+ * The raw log (surfaced inside an Anchor `SendTransactionError` when the
+ * signer doesn't have enough SOL for a system-program `transfer` CPI, e.g.
+ * `deposit_funds`) is opaque to end users:
+ *
+ *   "Transaction simulation failed: … Transfer: insufficient lamports
+ *   14399666, need 1000000000 Program … failed: custom program error: 0x1 …"
+ *
+ * This helper rewrites the relevant fragment into something a non-crypto-native
+ * user can act on. The numbers are integers in lamports; converted to SOL via
+ * `lamportsToSol` so the user sees e.g. "0.014 SOL" rather than "14399666
+ * lamports".
+ *
+ * Returns `null` when the pattern is absent so the caller can fall through to
+ * the default error-extraction path.
+ */
+function formatInsufficientLamportsError(message: string): string | null {
+  const match = message.match(
+    /Transfer: insufficient lamports (\d+), need (\d+)/
+  );
+  if (!match) return null;
+  const have = lamportsToSol(BigInt(match[1]));
+  const need = lamportsToSol(BigInt(match[2]));
+  return `Your connected wallet has ~${have} SOL but this transaction needs ${need} SOL. Fund your wallet and try again.`;
+}
+
+/**
  * Pull a single human-readable message out of any error thrown during a
  * Stocksie transaction (or anywhere else).
  *
@@ -116,6 +145,11 @@ export function shortPubkey(
  *     (`{ code, msg }`), already translated back to the on-chain message via
  *     the IDL's `errors` table.
  *
+ * Also recognises the system program's `Transfer: insufficient lamports …, need
+ * …` log (surfaced inside an Anchor `SendTransactionError`) and rewrites it to
+ * a SOL-denominated, actionable message — this is the common failure when a
+ * user deposits more SOL than their connected wallet holds.
+ *
  * Falls back to `Error#message`, then `String(err)`, so wallet rejection,
  * RPC downtime, and genuinely unknown failures still surface something useful.
  *
@@ -124,7 +158,9 @@ export function shortPubkey(
  */
 export function extractErrorMessage(err: unknown): string {
   if (err === null || err === undefined) return "Unknown error";
-  if (typeof err === "string") return err;
+  if (typeof err === "string") {
+    return formatInsufficientLamportsError(err) ?? err;
+  }
 
   if (err instanceof Error) {
     // Anchor framework constraint error: a nested `error` object carries the
@@ -155,6 +191,11 @@ export function extractErrorMessage(err: unknown): string {
     ) {
       return programErr.msg;
     }
+
+    // Friendly rewrite for the common "insufficient SOL" transfer failure,
+    // which shows up as raw simulation-log text in `err.message`.
+    const friendly = formatInsufficientLamportsError(err.message);
+    if (friendly) return friendly;
 
     return err.message || "Unknown error";
   }
