@@ -24,6 +24,7 @@
 // (lookup → known product card, or prefill the onboarding form).
 
 import { useEffect, useId, useRef, useState } from "react";
+import { flushSync } from "react-dom";
 import { Html5Qrcode } from "html5-qrcode";
 import { Button } from "@/components/ui/Button";
 
@@ -57,7 +58,10 @@ export function BarcodeScanner({ onScan }: BarcodeScannerProps) {
   // `useId` keeps multiple scanners on one page from colliding (defensive —
   // the UI only ever shows one at a time).
   const reactId = useId();
-  const elementId = `stocksie-scanner-${reactId.replace(/[^a-zA-Z0-9_-]/g, "")}`;
+  const elementId = `stocksie-scanner-${reactId.replace(
+    /[^a-zA-Z0-9_-]/g,
+    ""
+  )}`;
 
   const [status, setStatus] = useState<Status>({ kind: "idle" });
 
@@ -97,8 +101,19 @@ export function BarcodeScanner({ onScan }: BarcodeScannerProps) {
   // -------------------------------------------------------------------------
   const handleStart = async () => {
     if (scannerRef.current || status.kind === "starting") return;
-    setStatus({ kind: "starting" });
     scannedRef.current = false;
+
+    // Flush the "starting" state to the DOM synchronously so the container
+    // div below is display:block (with its min-height) BEFORE html5-qrcode
+    // creates and plays the <video> during start(). Without this, the
+    // container is display:none when the video element is created, and
+    // Chrome acquires the camera stream (the green LED lights up) but
+    // renders no frames — the feed area stays blank. flushSync is the
+    // correct escape hatch here: we need the DOM updated and measured
+    // before the imperative camera call on the very next line.
+    flushSync(() => {
+      setStatus({ kind: "starting" });
+    });
 
     // Insecure context (HTTP, except localhost) → getUserMedia is unavailable.
     // Surfacing this distinctly saves the user a confusing "permission denied"
@@ -164,7 +179,7 @@ export function BarcodeScanner({ onScan }: BarcodeScannerProps) {
         // view); ignore them so the console stays quiet.
         () => {
           /* per-frame non-decode — ignored */
-        },
+        }
       );
       setStatus({ kind: "scanning" });
     } catch (err) {
@@ -199,13 +214,19 @@ export function BarcodeScanner({ onScan }: BarcodeScannerProps) {
 
   return (
     <div className="flex flex-col gap-3">
-      {/* The mount point for html5-qrcode's <video>. Hidden until scanning so
-          the empty div doesn't take layout space in the idle/error states. */}
+      {/* The mount point for html5-qrcode's <video>. Visible (block) during
+          both `starting` and `scanning` so html5-qrcode sees a non-zero-sized
+          container when it creates and plays the video — see the flushSync
+          call in handleStart for why this matters. The min-height keeps the
+          empty placeholder from collapsing to zero before the video stream
+          arrives. Hidden in idle/error so it doesn't take layout space. */}
       <div
         id={elementId}
         className={
-          "overflow-hidden rounded-lg border border-stone-200 dark:border-slate-800 bg-white dark:bg-slate-950 " +
-          (status.kind === "scanning" ? "block" : "hidden")
+          "overflow-hidden rounded-lg border border-stone-200 dark:border-slate-800 bg-white dark:bg-slate-950 min-h-[240px] " +
+          (status.kind === "scanning" || status.kind === "starting"
+            ? "block"
+            : "hidden")
         }
         aria-hidden={status.kind !== "scanning"}
       />
